@@ -43,6 +43,8 @@ I will try building a modern ASP.NET Core API with all the essential features:
  2- Validation
  3- DTOs (Avoid exposing domain models directly)
 
+# Testing
+1- Unit Tests (xUnit/NUnit)
 
 # Modern Libraries
 1- Mapster (Faster alternative to AutoMapper)
