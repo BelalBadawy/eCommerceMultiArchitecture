@@ -1,21 +1,18 @@
 
 using FluentValidation;
-
 namespace eStoreCA.Shared.Dtos
 {
-    public class RegistrationDtoValidator : AbstractValidator<RegistrationDto>
+    public class ResetPasswordDtoValidator : AbstractValidator<ResetPasswordDto>
     {
-        public RegistrationDtoValidator()
+        public ResetPasswordDtoValidator()
         {
-            RuleFor(o => o.FullName).NotEmpty().MaximumLength(250);
+            RuleFor(o => o.Token).NotEmpty();
             RuleFor(o => o.Email).NotEmpty().EmailAddress().MaximumLength(100);
             RuleFor(o => o.Password).NotEmpty().MinimumLength(6);
             RuleFor(o => o.ConfirmPassword).NotEmpty().MinimumLength(6).Equal(o => o.Password);
-
+            
             #region Custom
             #endregion Custom
-
-
         }
     }
 }

@@ -2,18 +2,11 @@
 using System.ComponentModel.DataAnnotations;
 namespace eStoreCA.Shared.Dtos
 {
-    public class RegistrationDto
+    public class ResetPasswordDto
     {
-        [Required]
-        public string FullName { get; set; }
+        public string Token { get; set; }
 
-        [Required]
-        [EmailAddress]
         public string Email { get; set; }
-
-        //[Required]
-        //[MinLength(6)]
-        //public string UserName { get; set; }
 
         [Required]
         [MinLength(6)]

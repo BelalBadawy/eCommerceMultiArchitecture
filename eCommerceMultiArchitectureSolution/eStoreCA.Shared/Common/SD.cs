@@ -10,7 +10,6 @@ public static class SD
     #endregion
 
     #region Messages
-
     public const string SavedSuccessfully = "Saved Successfully";
     public const string ExistData = "This [{0}] already exist.";
     public const string ErrorOccurred = "An error has been occurred.";
@@ -18,6 +17,7 @@ public static class SD
     public const string CanNotDeleteData = "Sorry we can't delete this record";
     public const string AllowedForUpload = "Only {0} are allowed to be uploaded.";
     public const string IsRequiredData = "{0} is required.";
-
     #endregion
+
+    public const int MaximumLoginAttempts = 6;
 }

@@ -1,6 +1,12 @@
-namespace eStoreCA.Shared.Dtos;
 
-public class RevokeToken
+namespace eStoreCA.Shared.Dtos
 {
-    public string? Token { get; set; }
+    public class RevokeToken
+    {
+        public string? Token { get; set; }
+
+        #region Custom
+        #endregion Custom
+
+    }
 }
