@@ -1,0 +1,6 @@
+@eStoreCA.API_HostAddress = http://localhost:5117
+
+GET {{eStoreCA.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
