@@ -11,15 +11,15 @@ using eStoreCA.Shared.Interfaces;
 
 namespace eStoreCA.API.Controllers
 {
-     [ApiVersion("1.0")]
+    [ApiVersion("1.0")]
     public class AccountController : BaseApiController
     {
         private readonly IAuthService _authService;
 
 
 
-     
- public AccountController(IAuthService authService)
+
+        public AccountController(IAuthService authService)
         {
             _authService = authService;
         }
@@ -27,8 +27,8 @@ namespace eStoreCA.API.Controllers
 
 
 
-       
-       
+
+
         [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> RegisterAccount(RegistrationDto registrationModel)
@@ -41,8 +41,8 @@ namespace eStoreCA.API.Controllers
 
             var response = await _authService.RegisterAsync(registrationModel);
 
-             return ActionResult(response);
-          
+            return ActionResult(response);
+
         }
 
         [AllowAnonymous]
@@ -50,7 +50,7 @@ namespace eStoreCA.API.Controllers
         public async Task<IActionResult> Login(LoginDto loginModel)
         {
 
-           if (loginModel == null)
+            if (loginModel == null)
             {
                 return BadRequest(ModelState);
             }
@@ -65,11 +65,11 @@ namespace eStoreCA.API.Controllers
                 }
             }
 
-             return ActionResult(response);
-          
+            return ActionResult(response);
+
         }
 
-[AllowAnonymous]
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> ConfirmEmail(ConfirmEmailDto model)
         {
@@ -108,89 +108,89 @@ namespace eStoreCA.API.Controllers
             return ActionResult(response);
         }
 
-  //      [AllowAnonymous]
-  //       [HttpGet()]
-  //public async Task<IActionResult> RefreshToken()
-  //{
-  //    var refreshToken = Request.Cookies["refreshToken"];
+        //      [AllowAnonymous]
+        //       [HttpGet()]
+        //public async Task<IActionResult> RefreshToken()
+        //{
+        //    var refreshToken = Request.Cookies["refreshToken"];
 
-  //    var response = await _authService.RefreshTokenAsync(refreshToken);
+        //    var response = await _authService.RefreshTokenAsync(refreshToken);
 
-  //    if (response.Succeeded)
-  //    {
-  //        if (response.Data != null && !string.IsNullOrEmpty(response.Data.RefreshToken))
-  //        {
-  //            SetRefreshTokenInCookie(response.Data.RefreshToken, response.Data.RefreshTokenExpiration);
-  //        }
-  //    }
+        //    if (response.Succeeded)
+        //    {
+        //        if (response.Data != null && !string.IsNullOrEmpty(response.Data.RefreshToken))
+        //        {
+        //            SetRefreshTokenInCookie(response.Data.RefreshToken, response.Data.RefreshTokenExpiration);
+        //        }
+        //    }
 
-  //     return ActionResult(response);
-  //}
+        //     return ActionResult(response);
+        //}
 
-      [AllowAnonymous]
-       [HttpGet()]
-public async Task<IActionResult> RefreshToken(string refreshToken)
-{
-   if (string.IsNullOrEmpty(refreshToken))
-{
-    refreshToken = Request.Cookies["refreshToken"];
-}
-
-if (string.IsNullOrEmpty(refreshToken))
-{
-    return ReturnActionResult(null, false, null, "Token is required!", null);
-}
-    var response = await _authService.RefreshTokenAsync(refreshToken);
-
-    if (response.Succeeded)
-    {
-        if (response.Data != null && !string.IsNullOrEmpty(response.Data.RefreshToken))
+        [AllowAnonymous]
+        [HttpGet()]
+        public async Task<IActionResult> RefreshToken(string refreshToken)
         {
-            SetRefreshTokenInCookie(response.Data.RefreshToken, response.Data.RefreshTokenExpiration);
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                refreshToken = Request.Cookies["refreshToken"];
+            }
+
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                return ReturnActionResult(null, false, null, "Token is required!", null);
+            }
+            var response = await _authService.RefreshTokenAsync(refreshToken);
+
+            if (response.Succeeded)
+            {
+                if (response.Data != null && !string.IsNullOrEmpty(response.Data.RefreshToken))
+                {
+                    SetRefreshTokenInCookie(response.Data.RefreshToken, response.Data.RefreshTokenExpiration);
+                }
+            }
+
+            return ActionResult(response);
         }
+
+
+
+        [HttpPost()]
+        public async Task<IActionResult> RevokeToken([FromBody] RevokeToken model)
+        {
+            var token = model.Token ?? Request.Cookies["refreshToken"];
+
+            if (string.IsNullOrEmpty(token))
+            {
+                return ReturnActionResult(null, false, null, "Token is required!", null);
+            }
+
+            var response = await _authService.RevokeTokenAsync(token);
+
+            return ActionResult(response);
+        }
+
+
+
+        private void SetRefreshTokenInCookie(string refreshToken, DateTime expires)
+        {
+            if (!string.IsNullOrEmpty(refreshToken))
+            {
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                    Expires = expires.ToLocalTime(),
+                    Secure = true,
+                    IsEssential = true,
+                    SameSite = SameSiteMode.None
+                };
+                Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
+            }
+        }
+
+
+        #region Custom
+        #endregion Custom
+
     }
-
-     return ActionResult(response);
-}
-
-
-
-[HttpPost()]
-public async Task<IActionResult> RevokeToken([FromBody] RevokeToken model)
-{
-    var token = model.Token ?? Request.Cookies["refreshToken"];
-
-    if (string.IsNullOrEmpty(token))
-    {
-        return ReturnActionResult(null, false,null, "Token is required!", null);
-    }
-
-    var response = await _authService.RevokeTokenAsync(token);
-
-     return ActionResult(response);
-}
-
-
-
-         private void SetRefreshTokenInCookie(string refreshToken, DateTime expires)
-  {
-      if (!string.IsNullOrEmpty(refreshToken))
-      {
-          var cookieOptions = new CookieOptions
-          {
-              HttpOnly = true,
-              Expires = expires.ToLocalTime(),
-              Secure = true,
-              IsEssential = true,
-              SameSite = SameSiteMode.None
-          };
-          Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
-      }
-  }
-
-            
-#region Custom
-#endregion Custom
-
-}
 }
