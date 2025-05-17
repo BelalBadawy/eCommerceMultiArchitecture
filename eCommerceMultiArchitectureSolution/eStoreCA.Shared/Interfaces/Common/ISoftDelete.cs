@@ -1,12 +1,22 @@
+
 using System.ComponentModel.DataAnnotations;
-
-namespace eStoreCA.Shared.Interfaces;
-
-public interface ISoftDelete
+using System.ComponentModel.DataAnnotations.Schema;
+namespace eStoreCA.Shared.Interfaces
 {
-    public bool SoftDeleted { get; set; }
+    public interface ISoftDelete
+    {
+        public bool SoftDeleted { get; set; }
 
-    public Guid? DeletedBy { get; set; }
+        public Guid? DeletedBy { get; set; }
 
-    [DataType(DataType.DateTime)] public DateTime? DeletedAt { get; set; }
+        [DataType(DataType.DateTime)]
+        public DateTime? DeletedAt { get; set; }
+
+
+
+        #region Custom
+        #endregion Custom
+
+
+    }
 }

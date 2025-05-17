@@ -1,14 +1,22 @@
-using eStoreCA.Shared.Dtos;
+using eStoreCA.Domain.Entities;
 using eStoreCA.Shared.Interfaces;
 
-namespace eStoreCA.Domain.Events;
-
-public class CategoryUpdatedEvent : IDomainEvent
+using eStoreCA.Shared.Dtos;
+namespace eStoreCA.Domain.Events
 {
-    public CategoryUpdatedEvent(UpdateCategoryDto category)
-    {
-        Category = category;
-    }
 
-    public UpdateCategoryDto Category { get; }
+
+    public class CategoryUpdatedEvent : IDomainEvent
+    {
+        public CategoryUpdatedEvent(UpdateCategoryDto category)
+        {
+            Category = category;
+        }
+
+        public UpdateCategoryDto Category { get; }
+
+        #region Custom
+        #endregion Custom
+
+    }
 }

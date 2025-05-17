@@ -1,3 +1,4 @@
+
 using Mapster;
 using MapsterMapper;
 using Mediator;
@@ -15,12 +16,14 @@ namespace eStoreCA.Application.Features.Queries
     [Authorize(Policy = AppPermissions.UserPermissions.List)]
     public class GetAllUserQuery : GetAllUserQueryDto, IRequest<MyAppResponse<List<GetAllUserDto>>>
     {
-
+      
+        #region Custom Properties
+        #endregion Custom Properties
     }
 
     #endregion
 
-    #region GetAll Query Handler
+ #region GetAll Query Handler
     public class GetAllUserQueryHandler : IRequestHandler<GetAllUserQuery, MyAppResponse<List<GetAllUserDto>>>
     {
 
@@ -29,6 +32,10 @@ namespace eStoreCA.Application.Features.Queries
         public GetAllUserQueryHandler(IUserService UserService)
         {
             _UserService = UserService;
+
+            #region Custom Constructor
+            #endregion Custom Constructor
+
         }
 
         public async ValueTask<MyAppResponse<List<GetAllUserDto>>> Handle(GetAllUserQuery request, CancellationToken cancellationToken)

@@ -1,3 +1,4 @@
+ 
 using FluentValidation;
 
 namespace eStoreCA.Application.Features.Commands
@@ -7,7 +8,15 @@ namespace eStoreCA.Application.Features.Commands
         public UpdateRoleCommandValidator()
         {
             RuleFor(o => o.Name).NotEmpty().MaximumLength(150);
+
+            #region Custom Constructor
+            #endregion Custom Constructor
+
         }
+
+        #region Custom
+        #endregion Custom
+
     }
 }
 

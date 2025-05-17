@@ -20,6 +20,9 @@ namespace eStoreCA.Shared.Dtos
         public string ConfirmPassword { get; set; }
 
 
+
+
+
         #region Custom
         #endregion Custom
 

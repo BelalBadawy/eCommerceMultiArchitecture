@@ -14,10 +14,12 @@ namespace eStoreCA.Application.Features.Queries
     [Authorize(Policy = AppPermissions.UserPermissions.View)]
     public class GetByIdUserQuery : GetByIdUserQueryDto, IRequest<MyAppResponse<GetByIdUserDto>>
     {
+      
+        #region Custom Properties
+        #endregion Custom Properties
 
     }
     #endregion
-
     #region GetById Query Handler
     public class GetByIdUserQueryHandler : IRequestHandler<GetByIdUserQuery, MyAppResponse<GetByIdUserDto>>
     {
@@ -26,10 +28,18 @@ namespace eStoreCA.Application.Features.Queries
         public GetByIdUserQueryHandler(IUserService UserService)
         {
             _UserService = UserService;
+
+            #region Custom Constructor
+            #endregion Custom Constructor
+
         }
         public async ValueTask<MyAppResponse<GetByIdUserDto>> Handle(GetByIdUserQuery request, CancellationToken cancellationToken)
         {
+            #region Custom
+            #endregion Custom
+
             return await _UserService.GetUserById(request);
+
         }
     }
     #endregion

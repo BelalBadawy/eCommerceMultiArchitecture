@@ -1,21 +1,29 @@
-using System.Net;
+
 using FluentValidation.Results;
-
-namespace eStoreCA.Shared.Exceptions;
-
-[Serializable]
-public class ValidationException : CustomException
+using System.Net;
+namespace eStoreCA.Shared.Exceptions
 {
-    public ValidationException() : base("One or more validation failures have occurred.",
-        statusCode: HttpStatusCode.BadRequest)
+    public class ValidationException : CustomException
     {
-        Errors = new List<string>();
-    }
+        public ValidationException() : base("One or more validation failures have occurred.", statusCode: HttpStatusCode.BadRequest)
+        {
+            Errors = new List<string>();
+        }
+        public List<string> Errors { get; }
+        public ValidationException(IEnumerable<ValidationFailure> failures)
+            : this()
+        {
+            foreach (var failure in failures)
+            {
+                Errors.Add(failure.ErrorMessage);
+            }
+        }
 
-    public ValidationException(IEnumerable<ValidationFailure> failures) : this()
-    {
-        foreach (var failure in failures) Errors.Add(failure.ErrorMessage);
-    }
 
-    public List<string> Errors { get; }
+
+        #region Custom
+        #endregion Custom
+
+
+    }
 }

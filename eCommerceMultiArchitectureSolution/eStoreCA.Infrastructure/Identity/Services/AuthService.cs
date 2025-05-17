@@ -1,3 +1,5 @@
+
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -7,7 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using eStoreCA.Domain.Entities;
-using eStoreCA.Domain.Interfaces;
+using eStoreCA.Application.Interfaces;
 using eStoreCA.Shared.Common;
 using eStoreCA.Shared.Dtos;
 using eStoreCA.Shared.Interfaces;
@@ -17,9 +19,14 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
+	
+
+
+
+
 namespace eStoreCA.Infrastructure.Identity.Services
 {
-    public class AuthService : IAuthService
+   public class AuthService : IAuthService
     {
         public Guid? UserId => null;
 
@@ -35,17 +42,21 @@ namespace eStoreCA.Infrastructure.Identity.Services
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
 
-        public AuthService(
-                          UserManager<ApplicationUser> userManager,
-                          IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory,
-                          IOptions<JwtConfig> JwtConfig,
-                          SignInManager<ApplicationUser> signInManager,
-                          IAuthorizationService authorizationService,
-                          RoleManager<ApplicationRole> roleManager,
-                          IApplicationDbContext dbContext,
-                          IHttpContextAccessor httpContextAccessor,
-                          IConfiguration configuration,
-                          IEmailService emailService)
+
+	
+
+
+ public AuthService(
+                   UserManager<ApplicationUser> userManager,
+                   IUserClaimsPrincipalFactory<ApplicationUser> userClaimsPrincipalFactory,
+                   IOptions<JwtConfig> JwtConfig,
+                   SignInManager<ApplicationUser> signInManager,
+                   IAuthorizationService authorizationService,
+                   RoleManager<ApplicationRole> roleManager,
+                   IApplicationDbContext dbContext,
+                   IHttpContextAccessor httpContextAccessor,
+                   IConfiguration configuration,
+                   IEmailService emailService)
         {
             _userManager = userManager;
             _userClaimsPrincipalFactory = userClaimsPrincipalFactory;
@@ -60,172 +71,188 @@ namespace eStoreCA.Infrastructure.Identity.Services
         }
 
 
+
+
+
+       
+
+
+
+
         public async Task<MyAppResponse<AuthenticationResponse>> AuthenticateAsync(LoginDto loginModel)
         {
 
-            var dtoValidator = new LoginDtoValidator();
+var dtoValidator = new LoginDtoValidator();
 
-            var validationResult = dtoValidator.Validate(loginModel);
+var validationResult = dtoValidator.Validate(loginModel);
 
-            if (validationResult != null && validationResult.IsValid == false)
-            {
-                return new MyAppResponse<AuthenticationResponse>(errors: validationResult.Errors.Select(o => o.ErrorMessage).ToList());
-            }
+if (validationResult != null && validationResult.IsValid == false)
+{
+    return new MyAppResponse<AuthenticationResponse>(errors: validationResult.Errors.Select(o => o.ErrorMessage).ToList());
+}
+
+
+
 
             var user = await _userManager.FindByEmailAsync(loginModel.Email);
 
             if (user == null)
             {
+               
+
+  
+
                 return new MyAppResponse<AuthenticationResponse>($"User with {loginModel.Email} not found in.", statusCode: HttpStatusCode.NotFound);
 
             }
 
 
-            if (user.EmailConfirmed == false)
-                return new MyAppResponse<AuthenticationResponse>("Please confirm your email.", statusCode: HttpStatusCode.Unauthorized);
+
+         if (user.EmailConfirmed == false)
+             return new MyAppResponse<AuthenticationResponse>("Please confirm your email.", statusCode: HttpStatusCode.Unauthorized);
 
 
-            var result = await _signInManager.PasswordSignInAsync(user.UserName, loginModel.Password, false, lockoutOnFailure: false);
+           var result = await _signInManager.PasswordSignInAsync(user.UserName, loginModel.Password, false, lockoutOnFailure: false);
 
 
-            if (result.IsLockedOut)
-            {
-                return new MyAppResponse<AuthenticationResponse>(string.Format("Your account has been locked. You should wait until {0} (UTC time) to be able to login", user.LockoutEnd), statusCode: HttpStatusCode.Unauthorized);
-            }
+        if (result.IsLockedOut)
+        {
+            return new MyAppResponse<AuthenticationResponse>(string.Format("Your account has been locked. You should wait until {0} (UTC time) to be able to login", user.LockoutEnd), statusCode: HttpStatusCode.Unauthorized);
+        }
 
-            if (!result.Succeeded)
-            {
-                // Increamenting AccessFailedCount of the AspNetUser by 1
-                await _userManager.AccessFailedAsync(user);
+          if (!result.Succeeded)
+{
+  // Increamenting AccessFailedCount of the AspNetUser by 1
+  await _userManager.AccessFailedAsync(user);
 
-                if (user.AccessFailedCount >= SD.MaximumLoginAttempts)
-                {
-                    // Lock the user for one day
-                    await _userManager.SetLockoutEndDateAsync(user, DateTime.UtcNow.AddDays(1));
+  if (user.AccessFailedCount >= SD.MaximumLoginAttempts)
+  {
+      // Lock the user for one day
+      await _userManager.SetLockoutEndDateAsync(user, DateTime.UtcNow.AddDays(1));
 
-                    return new MyAppResponse<AuthenticationResponse>($"Your account has been locked. You should wait until {user.LockoutEnd} (UTC time) to be able to login", statusCode: HttpStatusCode.Unauthorized);
-                }
+      return new MyAppResponse<AuthenticationResponse>($"Your account has been locked. You should wait until {user.LockoutEnd} (UTC time) to be able to login", statusCode: HttpStatusCode.Unauthorized);
+  }
 
-                return new MyAppResponse<AuthenticationResponse>("Invalid username or password", statusCode: HttpStatusCode.Unauthorized);
+  return new MyAppResponse<AuthenticationResponse>("Invalid username or password", statusCode: HttpStatusCode.Unauthorized);
 
-            }
+}
 
 
-
+             
             var response = await GetUserTokenWithAsync(user, null);
-
+          
 
             return new MyAppResponse<AuthenticationResponse>(response);
         }
 
-        public async Task<MyAppResponse<bool>> RevokeTokenAsync(string token)
-        {
+  public async Task<MyAppResponse<bool>> RevokeTokenAsync(string token)
+ {
 
-            var refreshToken = await _dbContext.RefreshTokens.FirstOrDefaultAsync(t => t.Token == token);
+     var refreshToken = await _dbContext.RefreshTokens.FirstOrDefaultAsync(t => t.Token == token);
 
-            if (!refreshToken.IsActive)
-            {
-                return new MyAppResponse<bool>($"Invalid token.");
-            }
-
-
-            refreshToken.RevokedOn = DateTime.UtcNow;
-
-            _dbContext.RefreshTokens.Update(refreshToken);
-            await _dbContext.SaveChangesAsync(default);
-
-            return new MyAppResponse<bool>(true);
-        }
+     if (!refreshToken.IsActive)
+     {
+         return new MyAppResponse<bool>($"Invalid token.");
+     }
 
 
-        public async Task<MyAppResponse<AuthenticationResponse>> RefreshTokenAsync(string token)
-        {
-            AuthenticationResponse authModel = new AuthenticationResponse();
+     refreshToken.RevokedOn = DateTime.UtcNow;
 
-            var refreshToken = await _dbContext.RefreshTokens.AsNoTracking().FirstOrDefaultAsync(u => u.Token == token);
-            if (refreshToken == null || !refreshToken.IsActive)
-            {
-                return new MyAppResponse<AuthenticationResponse>($"Invalid token.", statusCode: HttpStatusCode.Unauthorized);
-            }
+     _dbContext.RefreshTokens.Update(refreshToken);
+     await _dbContext.SaveChangesAsync(default);
 
-            refreshToken.RevokedOn = DateTime.UtcNow;
-
-            var newRefreshToken = GenerateRefreshToken();
-            newRefreshToken.ApplicationUserId = refreshToken.ApplicationUserId;
-            await _dbContext.RefreshTokens.AddAsync(newRefreshToken);
-            await _dbContext.SaveChangesAsync(default);
-
-            var user = await _userManager.FindByIdAsync(refreshToken.ApplicationUserId.ToString());
-            if (user == null)
-            {
-                return new MyAppResponse<AuthenticationResponse>($"Invalid token.", statusCode: HttpStatusCode.Unauthorized);
-            }
-
-            if (user.LockoutEnd != null && user.LockoutEnd > DateTime.UtcNow)
-            {
-                return new MyAppResponse<AuthenticationResponse>($"You have been locked out.", statusCode: HttpStatusCode.Unauthorized);
-            }
+     return new MyAppResponse<bool>(true);
+ }
 
 
+      public async Task<MyAppResponse<AuthenticationResponse>> RefreshTokenAsync(string token)
+ {
+     AuthenticationResponse authModel = new AuthenticationResponse();
 
-            var jwtSecurityToken = await GenerateToken(user);
+     var refreshToken = await _dbContext.RefreshTokens.AsNoTracking().FirstOrDefaultAsync(u => u.Token == token);
+     if (refreshToken == null || !refreshToken.IsActive)
+     {
+         return new MyAppResponse<AuthenticationResponse>($"Invalid token.", statusCode: HttpStatusCode.Unauthorized);
+     }
+     
+     refreshToken.RevokedOn = DateTime.UtcNow;
 
-            authModel.Token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
-            authModel.Email = user.Email;
-            authModel.UserName = user.UserName;
-            authModel.Id = user.Id.ToString();
-            authModel.RefreshToken = newRefreshToken.Token;
-            authModel.RefreshTokenExpiration = newRefreshToken.ExpiresOn;
+     var newRefreshToken = GenerateRefreshToken();
+     newRefreshToken.ApplicationUserId = refreshToken.ApplicationUserId;
+     await _dbContext.RefreshTokens.AddAsync(newRefreshToken);
+     await _dbContext.SaveChangesAsync(default);
 
-            return new MyAppResponse<AuthenticationResponse>(authModel);
-        }
+     var user = await _userManager.FindByIdAsync(refreshToken.ApplicationUserId.ToString());
+     if (user == null)
+     {
+         return new MyAppResponse<AuthenticationResponse>($"Invalid token.", statusCode: HttpStatusCode.Unauthorized);
+     }
 
-        public async Task<MyAppResponse<AuthenticationResponse>> RefreshTokenAsync(Guid userid)
-        {
-            AuthenticationResponse authModel = new AuthenticationResponse();
-
-            var refreshToken = await _dbContext.RefreshTokens.AsNoTracking()
-                .FirstOrDefaultAsync(u => u.ApplicationUserId == userid && u.RevokedOn == null && u.ExpiresOn.Date > DateTime.Now.Date);
-            if (refreshToken == null || !refreshToken.IsActive)
-            {
-                return new MyAppResponse<AuthenticationResponse>($"Invalid token.", statusCode: HttpStatusCode.Unauthorized);
-            }
-
-            refreshToken.RevokedOn = DateTime.UtcNow;
-
-            var newRefreshToken = GenerateRefreshToken();
-            newRefreshToken.ApplicationUserId = refreshToken.ApplicationUserId;
-            await _dbContext.RefreshTokens.AddAsync(newRefreshToken);
-            await _dbContext.SaveChangesAsync(default);
-
-            var user = await _userManager.FindByIdAsync(refreshToken.ApplicationUserId.ToString());
-            if (user == null)
-            {
-                return new MyAppResponse<AuthenticationResponse>($"Invalid token.", statusCode: HttpStatusCode.Unauthorized);
-            }
-
-            if (user.LockoutEnd != null && user.LockoutEnd > DateTime.UtcNow)
-            {
-                return new MyAppResponse<AuthenticationResponse>($"You have been locked out.", statusCode: HttpStatusCode.Unauthorized);
-            }
+     if (user.LockoutEnd != null && user.LockoutEnd > DateTime.UtcNow)
+     {
+         return new MyAppResponse<AuthenticationResponse>($"You have been locked out.", statusCode: HttpStatusCode.Unauthorized);
+     }
 
 
 
-            var jwtSecurityToken = await GenerateToken(user);
+     var jwtSecurityToken = await GenerateToken(user);
 
-            authModel.Token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
-            authModel.Email = user.Email;
-            authModel.UserName = user.UserName;
-            authModel.Id = user.Id.ToString();
-            authModel.RefreshToken = newRefreshToken.Token;
-            authModel.RefreshTokenExpiration = newRefreshToken.ExpiresOn;
+     authModel.Token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+     authModel.Email = user.Email;
+     authModel.UserName = user.UserName;
+     authModel.Id = user.Id.ToString();
+     authModel.RefreshToken = newRefreshToken.Token;
+     authModel.RefreshTokenExpiration = newRefreshToken.ExpiresOn;
 
-            return new MyAppResponse<AuthenticationResponse>(authModel);
-        }
+     return new MyAppResponse<AuthenticationResponse>(authModel);
+ }
+
+ public async Task<MyAppResponse<AuthenticationResponse>> RefreshTokenAsync(Guid userid)
+ {
+     AuthenticationResponse authModel = new AuthenticationResponse();
+
+ var refreshToken = await _dbContext.RefreshTokens.AsNoTracking()
+     .FirstOrDefaultAsync(u => u.ApplicationUserId == userid && u.RevokedOn == null && u.ExpiresOn.Date > DateTime.Now.Date);
+ if (refreshToken == null || !refreshToken.IsActive)
+ {
+     return new MyAppResponse<AuthenticationResponse>($"Invalid token.", statusCode: HttpStatusCode.Unauthorized);
+ }
+
+ refreshToken.RevokedOn = DateTime.UtcNow;
+
+ var newRefreshToken = GenerateRefreshToken();
+ newRefreshToken.ApplicationUserId = refreshToken.ApplicationUserId;
+ await _dbContext.RefreshTokens.AddAsync(newRefreshToken);
+ await _dbContext.SaveChangesAsync(default);
+
+ var user = await _userManager.FindByIdAsync(refreshToken.ApplicationUserId.ToString());
+ if (user == null)
+ {
+     return new MyAppResponse<AuthenticationResponse>($"Invalid token.", statusCode: HttpStatusCode.Unauthorized);
+ }
+
+ if (user.LockoutEnd != null && user.LockoutEnd > DateTime.UtcNow)
+ {
+     return new MyAppResponse<AuthenticationResponse>($"You have been locked out.", statusCode: HttpStatusCode.Unauthorized);
+ }
+
+
+
+ var jwtSecurityToken = await GenerateToken(user);
+
+ authModel.Token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+ authModel.Email = user.Email;
+ authModel.UserName = user.UserName;
+ authModel.Id = user.Id.ToString();
+ authModel.RefreshToken = newRefreshToken.Token;
+ authModel.RefreshTokenExpiration = newRefreshToken.ExpiresOn;
+
+ return new MyAppResponse<AuthenticationResponse>(authModel);
+ }
 
         public async Task<MyAppResponse<Guid>> RegisterAsync(RegistrationDto request)
         {
-
+            
             var dtoValidator = new RegistrationDtoValidator();
 
             var validationResult = dtoValidator.Validate(request);
@@ -235,50 +262,54 @@ namespace eStoreCA.Infrastructure.Identity.Services
                 return new MyAppResponse<Guid>(errors: validationResult.Errors.Select(o => o.ErrorMessage).ToList());
             }
 
-            var user = new ApplicationUser
+
+
+           var user = new ApplicationUser
             {
                 Email = request.Email,
                 FullName = request.FullName,
                 EmailConfirmed = false,
                 UserName = request.Email,
                 CreatedDate = DateTime.Now
- ,
-            };
-            var existingEmail = await _userManager.FindByEmailAsync(request.Email);
+            
 
 
-            if (existingEmail == null)
-            {
-                var result = await _userManager.CreateAsync(user, request.Password);
+};
+           var existingEmail = await _userManager.FindByEmailAsync(request.Email);
+ 
 
-                if (result.Succeeded)
-                {
-                    try
-                    {
-                        if (await SendConfirmEMailAsync(user))
-                        {
-                            return new MyAppResponse<Guid>(user.Id, message: "Email sent successfully please check your email");
-                        }
-                        else
-                        {
-                            return new MyAppResponse<Guid>(message: "Failed to send email. Please contact admin", statusCode: HttpStatusCode.BadRequest);
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        return new MyAppResponse<Guid>(message: "Failed to send email. Please contact admin", statusCode: HttpStatusCode.BadRequest);
-                    }
-                }
-                else
-                {
-                    return new MyAppResponse<Guid>($"{string.Join("; ", result.Errors.Select(o => o.Description).ToList())}");
-                }
-            }
-            else
-            {
-                return new MyAppResponse<Guid>($"Email {request.Email} already exists.");
-            }
+  if (existingEmail == null)
+  {
+      var result = await _userManager.CreateAsync(user, request.Password);
 
+      if (result.Succeeded)
+      {
+          try
+          {
+              if (await SendConfirmEMailAsync(user))
+              {
+                  return new MyAppResponse<Guid>(user.Id, message: "Email sent successfully please check your email");
+              }
+              else
+              {
+                  return new MyAppResponse<Guid>(message: "Failed to send email. Please contact admin", statusCode: HttpStatusCode.BadRequest);
+              }
+          }
+          catch (Exception)
+          {
+              return new MyAppResponse<Guid>(message: "Failed to send email. Please contact admin", statusCode: HttpStatusCode.BadRequest);
+          }
+      }
+      else
+      {
+          return new MyAppResponse<Guid>($"{string.Join("; ", result.Errors.Select(o => o.Description).ToList())}");
+      }
+  }
+  else
+  {
+      return new MyAppResponse<Guid>($"Email {request.Email} already exists.");
+  }
+        
         }
 
         private async Task<AuthenticationResponse> GetUserTokenWithAsync(ApplicationUser user, RefreshToken userRefreshToken)
@@ -293,11 +324,11 @@ namespace eStoreCA.Infrastructure.Identity.Services
                 UserName = user.UserName
             };
 
-
+           
             var activeRefreshToken = await _dbContext.RefreshTokens.AsNoTracking()
                 .FirstOrDefaultAsync(t =>
                     t.ExpiresOn < DateTime.UtcNow &&
-                    t.RevokedOn == null &&
+                    t.RevokedOn == null  &&
                     t.ApplicationUserId == user.Id);
             if (activeRefreshToken != null)
             {
@@ -382,7 +413,7 @@ namespace eStoreCA.Infrastructure.Identity.Services
         }
 
 
-        private RefreshToken GenerateRefreshToken()
+       private RefreshToken GenerateRefreshToken()
         {
             var randomNumber = new byte[32];
 
@@ -434,7 +465,7 @@ namespace eStoreCA.Infrastructure.Identity.Services
 
         }
 
-        public async Task<List<Claim>> GetUserClaimsAsync(ApplicationUser user)
+public async Task<List<Claim>> GetUserClaimsAsync(ApplicationUser user)
         {
             if (user != null)
             {
@@ -484,49 +515,49 @@ namespace eStoreCA.Infrastructure.Identity.Services
         }
 
 
-        public async Task<MyAppResponse<bool>> ConfirmEmail(ConfirmEmailDto model)
-        {
-            var dtoValidator = new ConfirmEmailDtoValidator();
+         public async Task<MyAppResponse<bool>> ConfirmEmail(ConfirmEmailDto model)
+ {
+     var dtoValidator = new ConfirmEmailDtoValidator();
 
-            var validationResult = dtoValidator.Validate(model);
+     var validationResult = dtoValidator.Validate(model);
 
-            if (validationResult != null && validationResult.IsValid == false)
-            {
-                return new MyAppResponse<bool>(errors: validationResult.Errors.Select(o => o.ErrorMessage).ToList());
-            }
-
-
-
-            var user = await _userManager.FindByEmailAsync(model.Email);
-
-            if (user == null)
-                return new MyAppResponse<bool>($"This email address has not been registered yet", statusCode: HttpStatusCode.Unauthorized);
+     if (validationResult != null && validationResult.IsValid == false)
+     {
+         return new MyAppResponse<bool>(errors: validationResult.Errors.Select(o => o.ErrorMessage).ToList());
+     }
 
 
-            if (user.EmailConfirmed == true)
-                return new MyAppResponse<bool>($"Your email was confirmed before. Please login to your account", statusCode: HttpStatusCode.BadRequest);
 
-            try
-            {
-                var decodedTokenBytes = WebEncoders.Base64UrlDecode(model.Token);
+     var user = await _userManager.FindByEmailAsync(model.Email);
 
-                var decodedToken = Encoding.UTF8.GetString(decodedTokenBytes);
+     if (user == null)
+         return new MyAppResponse<bool>($"This email address has not been registered yet", statusCode: HttpStatusCode.Unauthorized);
 
-                var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
 
-                if (result.Succeeded)
-                {
-                    return new MyAppResponse<bool>(true, $"Your email address is confirmed. You can login now");
-                }
+     if (user.EmailConfirmed == true)
+         return new MyAppResponse<bool>($"Your email was confirmed before. Please login to your account", statusCode: HttpStatusCode.BadRequest);
 
-                return new MyAppResponse<bool>($"Invalid token. Please try again", statusCode: HttpStatusCode.BadRequest);
+     try
+     {
+         var decodedTokenBytes = WebEncoders.Base64UrlDecode(model.Token);
 
-            }
-            catch (Exception)
-            {
-                return new MyAppResponse<bool>($"Invalid token. Please try again", statusCode: HttpStatusCode.BadRequest);
-            }
-        }
+         var decodedToken = Encoding.UTF8.GetString(decodedTokenBytes);
+
+         var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+
+         if (result.Succeeded)
+         {
+             return new MyAppResponse<bool>(true, $"Your email address is confirmed. You can login now");
+         }
+
+         return new MyAppResponse<bool>($"Invalid token. Please try again", statusCode: HttpStatusCode.BadRequest);
+
+     }
+     catch (Exception)
+     {
+         return new MyAppResponse<bool>($"Invalid token. Please try again", statusCode: HttpStatusCode.BadRequest);
+     }
+ }
 
         public async Task<List<Claim>> GetUserClaimsAsync(Guid userId)
         {
@@ -565,7 +596,6 @@ namespace eStoreCA.Infrastructure.Identity.Services
                         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                         new Claim(JwtRegisteredClaimNames.Email, user.Email),
                         new Claim("uid", user.Id.ToString()),
-
                        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
                     }
                     .Union(userClaims)
@@ -735,9 +765,9 @@ namespace eStoreCA.Infrastructure.Identity.Services
             }
         }
 
+ 
+#region Custom
+#endregion Custom
 
-        #region Custom
-        #endregion Custom
-
-    }
+}
 }

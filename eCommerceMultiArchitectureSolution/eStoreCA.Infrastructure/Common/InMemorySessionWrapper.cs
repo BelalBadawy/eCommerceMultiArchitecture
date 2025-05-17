@@ -32,5 +32,10 @@ namespace eStoreCA.Infrastructure.Common
             _httpContextAccessor?.HttpContext?.Session?.SetString(key, JsonConvert.SerializeObject(value));
         }
 
+
+
+        #region Custom
+        #endregion Custom
+
     }
 }

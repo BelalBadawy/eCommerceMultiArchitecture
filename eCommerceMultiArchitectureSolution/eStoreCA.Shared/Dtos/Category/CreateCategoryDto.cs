@@ -1,14 +1,19 @@
+
+
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+namespace eStoreCA.Shared.Dtos
 
-namespace eStoreCA.Shared.Dtos;
-
-public class CreateCategoryDto
 {
-    public Guid Id { get; set; }
+    public class CreateCategoryDto
+    {
 
-    public string Title { get; set; }
+        public Guid Id { get; set; }
+        public string Title { get; set; }
+        public bool IsActive { get; set; }
 
-    public bool IsActive { get; set; }
+        #region Custom
+        #endregion Custom
 
-    [Timestamp] public byte[] RowVersion { get; set; }
+    }
 }

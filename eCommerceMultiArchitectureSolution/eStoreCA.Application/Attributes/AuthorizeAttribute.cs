@@ -1,5 +1,7 @@
+
 namespace eStoreCA.Application.Attributes
 {
+
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
     public class AuthorizeAttribute : Attribute
     {
@@ -8,5 +10,13 @@ namespace eStoreCA.Application.Attributes
         public string Roles { get; set; }
 
         public string Policy { get; set; }
+
+
+
+
+        #region Custom
+        #endregion Custom
+
+
     }
 }

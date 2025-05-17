@@ -10,20 +10,23 @@ using System.Text;
 
 namespace eStoreCA.Application.Behaviours
 {
-    public class CachingBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : IRequest<TResponse>, ICacheAbleMediatorQuery
+    public class CachingBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : IRequest<TResponse>, ICacheAbleMediatorQuery
     {
         private readonly IDistributedCache _cache;
         private readonly ILogger _logger;
         private readonly CacheConfiguration _settings;
 
-        public CachingBehaviour(IDistributedCache cache, ILogger<TResponse> logger, IOptions<CacheConfiguration> settings)
+        public CachingBehaviour(IDistributedCache cache, ILogger<TResponse> logger,
+            IOptions<CacheConfiguration> settings)
         {
             _cache = cache;
             _logger = logger;
             _settings = settings.Value;
         }
 
-        public async ValueTask<TResponse> Handle(TRequest request, MessageHandlerDelegate<TRequest, TResponse> next, CancellationToken cancellationToken)
+        public async ValueTask<TResponse> Handle(TRequest request, MessageHandlerDelegate<TRequest, TResponse> next,
+            CancellationToken cancellationToken)
         {
             TResponse response;
             if (request.BypassCache)
@@ -32,12 +35,15 @@ namespace eStoreCA.Application.Behaviours
             async Task<TResponse> GetResponseAndAddToCache()
             {
                 response = await next(request, cancellationToken);
-                var slidingExpiration = request.SlidingExpiration == null ? TimeSpan.FromHours(_settings.SlidingExpirationInMinutes) : request.SlidingExpiration;
+                var slidingExpiration = request.SlidingExpiration == null
+                    ? TimeSpan.FromHours(_settings.SlidingExpirationInMinutes)
+                    : request.SlidingExpiration;
                 var options = new DistributedCacheEntryOptions { SlidingExpiration = slidingExpiration };
                 var serializedData = Encoding.Default.GetBytes(JsonConvert.SerializeObject(response));
                 await _cache.SetAsync((string)request.CacheKey, serializedData, options, cancellationToken);
                 return response;
             }
+
             var cachedResponse = await _cache.GetAsync((string)request.CacheKey, cancellationToken);
             if (cachedResponse != null)
             {
@@ -54,4 +60,5 @@ namespace eStoreCA.Application.Behaviours
         }
     }
 }
+
 

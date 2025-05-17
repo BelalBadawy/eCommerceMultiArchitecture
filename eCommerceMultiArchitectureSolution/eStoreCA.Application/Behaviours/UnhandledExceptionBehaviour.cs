@@ -6,7 +6,7 @@ using System.Text.Json;
 namespace eStoreCA.Application.Behaviours
 {
     public class UnhandledExceptionBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-        where TRequest : IRequest<TResponse>
+    where TRequest : IRequest<TResponse>
     {
         private readonly ILogger<TRequest> _logger;
 
@@ -32,5 +32,8 @@ namespace eStoreCA.Application.Behaviours
                 throw;
             }
         }
+
+
+
     }
 }

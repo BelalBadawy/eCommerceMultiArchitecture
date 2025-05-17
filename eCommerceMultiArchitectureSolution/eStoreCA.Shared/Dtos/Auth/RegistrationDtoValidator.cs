@@ -12,6 +12,8 @@ namespace eStoreCA.Shared.Dtos
             RuleFor(o => o.Password).NotEmpty().MinimumLength(6);
             RuleFor(o => o.ConfirmPassword).NotEmpty().MinimumLength(6).Equal(o => o.Password);
 
+
+
             #region Custom
             #endregion Custom
 

@@ -1,11 +1,19 @@
+
 using System.Net;
-
-namespace eStoreCA.Shared.Exceptions;
-
-[Serializable]
-public class EntityAlreadyExistsException : CustomException
+namespace eStoreCA.Shared.Exceptions
 {
-    public EntityAlreadyExistsException(string message) : base(message, null, HttpStatusCode.BadRequest)
+    public class EntityAlreadyExistsException : CustomException
     {
+        public EntityAlreadyExistsException(string message)
+            : base(message, null, HttpStatusCode.BadRequest)
+        {
+        }
+
+
+
+        #region Custom
+        #endregion Custom
+
+
     }
 }

@@ -105,5 +105,11 @@ namespace eStoreCA.Infrastructure.Common
             return await ApiRequestAsync<T>(url, id, token, ApiRequestType.Get);
         }
 
+
+
+
+        #region Custom
+        #endregion Custom
+
     }
 }

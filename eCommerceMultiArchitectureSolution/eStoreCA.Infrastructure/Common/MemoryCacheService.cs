@@ -40,5 +40,10 @@ namespace eStoreCA.Infrastructure.Common
             _memoryCache.Remove(cacheKey);
         }
 
+
+
+        #region Custom
+        #endregion Custom
+
     }
 }

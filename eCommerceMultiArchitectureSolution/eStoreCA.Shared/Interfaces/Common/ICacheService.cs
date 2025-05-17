@@ -1,8 +1,19 @@
-namespace eStoreCA.Shared.Interfaces;
 
-public interface ICacheService
+
+namespace eStoreCA.Shared.Interfaces
 {
-    bool TryGet<T>(string cacheKey, out T value);
-    T Set<T>(string cacheKey, T value);
-    void Remove(string cacheKey);
+    public interface ICacheService
+    {
+        bool TryGet<T>(string cacheKey, out T value);
+        T Set<T>(string cacheKey, T value);
+        void Remove(string cacheKey);
+
+
+
+
+        #region Custom
+        #endregion Custom
+
+
+    }
 }

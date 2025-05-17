@@ -1,7 +1,11 @@
-namespace eStoreCA.Shared.Common;
-
-public class KeyValue<T>
+namespace eStoreCA.Shared.Common
 {
-    public T Id { get; set; }
-    public string Value { get; set; }
+    public class KeyValue<T>
+    {
+        public T Id { get; set; }
+        public string Value { get; set; }
+
+        #region Custom
+        #endregion Custom
+    }
 }

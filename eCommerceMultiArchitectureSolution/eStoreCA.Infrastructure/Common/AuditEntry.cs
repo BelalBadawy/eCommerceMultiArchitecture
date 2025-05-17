@@ -14,5 +14,10 @@ namespace eStoreCA.Infrastructure.Common
         public AppEnums.AuditType AuditType { get; set; }
         public List<string> ChangedColumns { get; } = new List<string>();
 
+
+
+        #region Custom
+        #endregion Custom
+
     }
 }

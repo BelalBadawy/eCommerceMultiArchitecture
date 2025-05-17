@@ -258,6 +258,12 @@ namespace eStoreCA.Infrastructure.Data.Initializer
             claimCategory.AppClaims.Add(claimCategoryDelete);
             #endregion
 
+
+
+
+            #region Custom
+            #endregion Custom
+
             List<AppClaim> existsAppClaims = new List<AppClaim>();
 
             existsAppClaims = db.AppClaims.ToListAsync().GetAwaiter().GetResult();

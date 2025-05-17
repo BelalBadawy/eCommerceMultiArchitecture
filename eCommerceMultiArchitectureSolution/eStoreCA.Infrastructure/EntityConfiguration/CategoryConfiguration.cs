@@ -14,6 +14,9 @@ namespace eStoreCA.Infrastructure.Data.EntityConfiguration
             // key
 
 
+
+
+
             builder.HasKey(t => t.Id); builder.Property(t => t.Id).HasColumnName("Id").HasColumnType("uniqueidentifier").IsRequired();
             builder.Property(t => t.Title).HasColumnName("Title").HasColumnType("nvarchar(255)").HasMaxLength(255).IsRequired();
             builder.Property(t => t.IsActive).HasColumnName("IsActive").HasColumnType("bit").IsRequired();
@@ -25,7 +28,6 @@ namespace eStoreCA.Infrastructure.Data.EntityConfiguration
             builder.Property(t => t.SoftDeleted).HasColumnName("SoftDeleted").HasColumnType("bit").IsRequired();
             builder.Property(t => t.DeletedBy).HasColumnName("DeletedBy").HasColumnType("uniqueidentifier");
             builder.Property(t => t.DeletedAt).HasColumnName("DeletedAt").HasColumnType("datetime2");
-            
             #region Custom
             #endregion Custom
 

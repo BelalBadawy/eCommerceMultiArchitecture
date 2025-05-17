@@ -5,19 +5,20 @@ using Mediator;
 using Microsoft.EntityFrameworkCore;
 using eStoreCA.Application.Attributes;
 using eStoreCA.Domain.Entities;
-using eStoreCA.Domain.Interfaces;
+using eStoreCA.Application.Interfaces;
 using eStoreCA.Shared.Common;
 using eStoreCA.Shared.Dtos;
 using eStoreCA.Shared.Interfaces;
 namespace eStoreCA.Application.Features.Commands
+
 {
-    #region Create Command Parameters
+
+#region Create Command Parameters
     public class CreateLogUserActivityCommand : CreateLogUserActivityDto,  IRequest<MyAppResponse<int>>
     {
 
     }
     #endregion
-
     #region Create Command Handler
     public class CreateLogUserActivityCommandHandler : IRequestHandler<CreateLogUserActivityCommand, MyAppResponse<int>>
     {
@@ -35,11 +36,14 @@ namespace eStoreCA.Application.Features.Commands
 
         public async ValueTask<MyAppResponse<int>> Handle(CreateLogUserActivityCommand request, CancellationToken cancellationToken)
         {
+            #region Custom
+            #endregion Custom
+
             try
             {
                 LogUserActivity logUserActivity = _mapper.Map<LogUserActivity>(request);
 
-                await _dbContext.LogUserActivities.AddAsync(logUserActivity, cancellationToken);
+                await _dbContext.LogUserActivities.AddAsync(logUserActivity,cancellationToken);
 
                 int effectedRows = await _dbContext.SaveChangesAsync(cancellationToken);
 

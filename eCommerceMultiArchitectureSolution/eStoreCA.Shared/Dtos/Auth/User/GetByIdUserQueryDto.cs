@@ -1,6 +1,16 @@
-namespace eStoreCA.Shared.Dtos;
 
-public class GetByIdUserQueryDto
+using System.ComponentModel.DataAnnotations;
+namespace eStoreCA.Shared.Dtos
 {
-    public Guid Id { get; set; }
+    public class GetByIdUserQueryDto
+    {
+        public Guid Id { get; set; }
+
+
+
+        #region Custom
+        #endregion Custom
+
+
+    }
 }

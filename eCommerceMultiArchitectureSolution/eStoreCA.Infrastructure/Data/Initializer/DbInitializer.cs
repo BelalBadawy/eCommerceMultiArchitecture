@@ -34,6 +34,8 @@ namespace eStoreCA.Infrastructure.Data.Initializer
 
             AppClaimsInitializer.AppClaimsAsync(_db);
             UserInitializer.AddUser(_db, _userManager, _roleManager);
+            #region Custom
+            #endregion Custom
 
         }
     }

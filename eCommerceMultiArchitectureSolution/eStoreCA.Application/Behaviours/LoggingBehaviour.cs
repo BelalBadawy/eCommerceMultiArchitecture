@@ -1,7 +1,8 @@
 
+
+using System.Text.Json;
 using Mediator;
 using Microsoft.Extensions.Logging;
-using System.Text.Json;
 
 namespace eStoreCA.Application.Behaviours
 {
@@ -20,5 +21,11 @@ namespace eStoreCA.Application.Behaviours
 
             return await next(request, cancellationToken);
         }
+
+
+
+        #region Custom
+        #endregion Custom
+
     }
 }

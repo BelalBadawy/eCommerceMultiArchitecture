@@ -25,29 +25,34 @@ namespace eStoreCA.Infrastructure.Identity.Services
 
             var existRole = await _roleManager.FindByNameAsync(newRoleName);
 
-
-            await _roleManager.CreateAsync(new ApplicationRole() { Name = newRoleName });
-
-            var newRole = await _roleManager.Roles.FirstOrDefaultAsync(r => r.Name == newRoleName );
-
-            if (newRole != null)
+            if (existRole != null)
             {
-                if (request.RolePermissions != null && request.RolePermissions.Any())
+return new MyAppResponse<Guid>(string.Format(SD.ExistData, request.Name));
+}
+
+                       
+                await _roleManager.CreateAsync(new ApplicationRole() { Name = newRoleName});
+
+                var newRole = await _roleManager.FindByNameAsync(newRoleName);
+
+                if (newRole != null)
                 {
-                    var claims = await _roleManager.GetClaimsAsync(newRole);
-                    var selectedClaims = request.RolePermissions;
-                    foreach (var p in selectedClaims)
+                    if (request.RolePermissions != null && request.RolePermissions.Any())
                     {
-                        if (!string.IsNullOrEmpty(p))
+                        var claims = await _roleManager.GetClaimsAsync(newRole);
+                        var selectedClaims = request.RolePermissions;
+                        foreach (var p in selectedClaims)
                         {
-                            await _roleManager.AddClaimAsync(newRole,
-                                new Claim(CustomClaimTypes.Permission, p.Trim().ToUpper()));
+                            if (!string.IsNullOrEmpty(p))
+                            {
+                                await _roleManager.AddClaimAsync(newRole,
+                                    new Claim(CustomClaimTypes.Permission, p.Trim().ToUpper()));
+                            }
                         }
                     }
                 }
-            }
-            return new MyAppResponse<Guid>(data: newRole.Id);
-
+                return new MyAppResponse<Guid>(data: newRole.Id);
+            
 
             return new MyAppResponse<Guid>("Error in saving data");
         }
@@ -55,10 +60,10 @@ namespace eStoreCA.Infrastructure.Identity.Services
         public async Task<MyAppResponse<bool>> DeleteRole(DeleteRoleDto request)
         {
 
-            var result = await _roleManager.Roles.FirstOrDefaultAsync(r => r.Id == request.Id);
+var result = await _roleManager.FindByIdAsync(request.Id.ToString());
 
 
-
+        
 
             if (result != null)
             {
@@ -76,7 +81,7 @@ namespace eStoreCA.Infrastructure.Identity.Services
 
             List<ApplicationRole> result = null;
 
-            result = await _roleManager.Roles.ToListAsync();
+result = await _roleManager.Roles.ToListAsync();
 
 
 
@@ -115,7 +120,7 @@ namespace eStoreCA.Infrastructure.Identity.Services
 
                             break;
 
-
+                          
 
                     }
                 }
@@ -147,8 +152,8 @@ namespace eStoreCA.Infrastructure.Identity.Services
 
             ApplicationRole result = null;
 
-
-            result = await _roleManager.Roles.FirstOrDefaultAsync(o => o.Id == request.Id);
+           
+result = await _roleManager.FindByIdAsync(request.Id.ToString());
 
 
             if (result != null)
@@ -171,19 +176,19 @@ namespace eStoreCA.Infrastructure.Identity.Services
         {
             var newRoleName = request.Name.Trim();
 
+  
+var existRole = await _roleManager.FindByNameAsync(newRoleName);
 
-            var existRole = await _roleManager.Roles.FirstOrDefaultAsync(o => o.Name.ToUpper() == newRoleName.ToUpper());
 
-
-
+            
 
             if (existRole != null && existRole.Id != request.Id)
             {
                 return new MyAppResponse<bool>(string.Format(SD.ExistData, newRoleName));
             }
 
-
-            var roleToUpdate = await _roleManager.Roles.FirstOrDefaultAsync(o => o.Id == request.Id);
+           
+var roleToUpdate = await _roleManager.FindByIdAsync(request.Id.ToString());
 
 
             roleToUpdate.Name = newRoleName;
@@ -199,7 +204,7 @@ namespace eStoreCA.Infrastructure.Identity.Services
                 {
                     await _roleManager.RemoveClaimAsync(roleToUpdate, c);
                 }
-                if (request.RolePermissions != null && request.RolePermissions.Any())
+                 if (request.RolePermissions != null && request.RolePermissions.Any())
                 {
                     var selectedClaims = request.RolePermissions;
                     foreach (var a in selectedClaims)
@@ -217,9 +222,9 @@ namespace eStoreCA.Infrastructure.Identity.Services
         }
 
 
-        public async Task<MyAppResponse<List<GetAllRoleWithoutClaimsDto>>> GetAllRolesWithoutClaims(Guid tenantId)
+public async Task<MyAppResponse<List<GetAllRoleWithoutClaimsDto>>> GetAllRolesWithoutClaims()
 
-
+        
         {
 
             List<GetAllRoleWithoutClaimsDto> dtos = new List<GetAllRoleWithoutClaimsDto>();
@@ -227,9 +232,9 @@ namespace eStoreCA.Infrastructure.Identity.Services
             List<ApplicationRole> result = null;
 
 
-            result = await _roleManager.Roles.ToListAsync();
+result = await _roleManager.Roles.ToListAsync();
 
-
+            
 
 
             if (result != null && result.Any())

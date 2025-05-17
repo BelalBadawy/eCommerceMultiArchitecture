@@ -1,6 +1,12 @@
-namespace eStoreCA.Shared.Dtos;
 
-public class GetByIdRoleQueryDto
+namespace eStoreCA.Shared.Dtos
 {
-    public Guid Id { get; set; }
+    public class GetByIdRoleQueryDto
+    {
+        public Guid Id { get; set; }
+
+        #region Custom
+        #endregion Custom
+
+    }
 }

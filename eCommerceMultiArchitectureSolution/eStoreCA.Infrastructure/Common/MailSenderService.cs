@@ -1,10 +1,11 @@
 
-using eStoreCA.Shared.Common;
-using eStoreCA.Shared.Dtos;
-using eStoreCA.Shared.Interfaces;
+using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
+using eStoreCA.Shared.Common;
+using eStoreCA.Shared.Dtos;
+using eStoreCA.Shared.Interfaces;
 
 namespace eStoreCA.Infrastructure.Common
 {
@@ -96,7 +97,7 @@ namespace eStoreCA.Infrastructure.Common
 
 
 
-                using var smtp = new MailKit.Net.Smtp.SmtpClient();
+                using var smtp = new SmtpClient();
 
 
                 await smtp.ConnectAsync(_emailSettings.Host, _emailSettings.Port, SecureSocketOptions.StartTls);
@@ -116,5 +117,12 @@ namespace eStoreCA.Infrastructure.Common
 
             return "Can't send email right now";
         }
+
+
+
+
+        #region Custom
+        #endregion Custom
+
     }
 }

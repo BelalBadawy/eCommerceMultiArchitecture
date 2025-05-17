@@ -1,14 +1,16 @@
+
 using System.Security.Claims;
-
-namespace eStoreCA.Shared.Interfaces;
-
-public interface ICurrentUserService
+namespace eStoreCA.Shared.Interfaces
 {
-    public bool IsAuthenticated { get; }
-    public bool IsInRole(string role);
-    public bool HasClaim(string type, string value);
+    public interface ICurrentUserService
+    {
+        string UserId { get; }
+        string UserName { get; }
+        ClaimsPrincipal User { get; }
 
-    string UserId { get; }
-    string UserName { get; }
-    ClaimsPrincipal User { get; }
+        #region Custom
+        #endregion Custom
+
+
+    }
 }

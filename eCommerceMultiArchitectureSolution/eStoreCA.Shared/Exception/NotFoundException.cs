@@ -1,11 +1,19 @@
+
 using System.Net;
-
-namespace eStoreCA.Shared.Exceptions;
-
-[Serializable]
-public class NotFoundException : CustomException
+namespace eStoreCA.Shared.Exceptions
 {
-    public NotFoundException(string message) : base(message, null, HttpStatusCode.NotFound)
+    public class NotFoundException : CustomException
     {
+        public NotFoundException(string message) : base(message, null, HttpStatusCode.NotFound)
+        {
+
+        }
+
+
+
+        #region Custom
+        #endregion Custom
+
+
     }
 }

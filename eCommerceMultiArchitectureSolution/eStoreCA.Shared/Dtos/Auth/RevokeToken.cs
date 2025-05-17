@@ -8,5 +8,6 @@ namespace eStoreCA.Shared.Dtos
         #region Custom
         #endregion Custom
 
+
     }
 }

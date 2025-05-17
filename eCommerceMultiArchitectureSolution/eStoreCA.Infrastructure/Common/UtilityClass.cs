@@ -8,7 +8,7 @@ namespace eStoreCA.Infrastructure.Common
     public static class UtilityClass
     {
 
-        public static bool ValidateEmail(string emailAddress)
+        public static bool Validate(string emailAddress)
         {
             var regex = @"\A(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)\Z";
             bool isValid = Regex.IsMatch(emailAddress, regex, RegexOptions.IgnoreCase);
@@ -49,6 +49,11 @@ namespace eStoreCA.Infrastructure.Common
                 writer.Close();
             }
         }
+
+
+
+        #region Custom
+        #endregion Custom
 
     }
 }

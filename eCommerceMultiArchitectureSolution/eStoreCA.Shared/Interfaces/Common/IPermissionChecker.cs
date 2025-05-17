@@ -1,6 +1,17 @@
-namespace eStoreCA.Shared.Interfaces;
 
-public interface IPermissionChecker
+using System.Security.Claims;
+namespace eStoreCA.Shared.Interfaces
 {
-    bool HasClaim(string requiredClaim);
+    public interface IPermissionChecker
+    {
+        bool HasClaim(string requiredClaim);
+
+
+
+
+        #region Custom
+        #endregion Custom
+
+
+    }
 }

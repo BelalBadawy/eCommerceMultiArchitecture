@@ -1,8 +1,17 @@
+
 using eStoreCA.Shared.Dtos;
-
-namespace eStoreCA.Shared.Interfaces;
-
-public interface IEmailService
+namespace eStoreCA.Shared.Interfaces
 {
-    Task<string> SendAsync(SendEmailDto request);
+    public interface IEmailService
+    {
+        Task<string> SendAsync(SendEmailDto request);
+
+
+
+
+        #region Custom
+        #endregion Custom
+
+
+    }
 }

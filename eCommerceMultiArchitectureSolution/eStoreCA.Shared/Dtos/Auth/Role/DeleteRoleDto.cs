@@ -1,6 +1,12 @@
-namespace eStoreCA.Shared.Dtos;
 
-public class DeleteRoleDto
+namespace eStoreCA.Shared.Dtos
 {
-    public Guid Id { get; set; }
+    public class DeleteRoleDto
+    {
+        public Guid Id { get; set; }
+
+        #region Custom
+        #endregion Custom
+
+    }
 }

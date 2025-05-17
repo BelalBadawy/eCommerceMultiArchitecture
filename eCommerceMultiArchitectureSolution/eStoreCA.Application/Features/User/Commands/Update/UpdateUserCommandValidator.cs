@@ -1,4 +1,4 @@
-
+ 
 using FluentValidation;
 
 namespace eStoreCA.Application.Features.Commands
@@ -8,10 +8,18 @@ namespace eStoreCA.Application.Features.Commands
         public UpdateUserCommandValidator()
         {
             RuleFor(o => o.Id).NotEmpty().WithMessage("Missing user id");
-            RuleFor(o => o.FullName).NotEmpty().MaximumLength(200);
-            RuleFor(o => o.UserName).NotEmpty().MaximumLength(200);
-            RuleFor(o => o.Email).NotEmpty().MaximumLength(200).EmailAddress();
+                RuleFor(o => o.FullName).NotEmpty().MaximumLength(200);
+                RuleFor(o => o.UserName).NotEmpty().MaximumLength(200);
+                RuleFor(o => o.Email).NotEmpty().MaximumLength(200).EmailAddress();
+
+                #region Custom Constructor
+                #endregion Custom Constructor
+
         }
+
+            #region Custom
+            #endregion Custom
+
     }
 }
 

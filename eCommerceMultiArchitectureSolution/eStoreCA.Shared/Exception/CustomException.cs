@@ -1,19 +1,25 @@
+
 using System.Net;
-
-namespace eStoreCA.Shared.Exceptions;
-
-[Serializable]
-public class CustomException : Exception
+namespace eStoreCA.Shared.Exceptions
 {
-    public CustomException(string message, List<string> errors = default,
-        HttpStatusCode statusCode = HttpStatusCode.InternalServerError)
-        : base(message)
+    public class CustomException : Exception
     {
-        ErrorMessages = errors;
-        StatusCode = statusCode;
+        public List<string> ErrorMessages { get; } = new();
+
+        public HttpStatusCode StatusCode { get; }
+
+        public CustomException(string message, List<string> errors = default, HttpStatusCode statusCode = HttpStatusCode.InternalServerError)
+            : base(message)
+        {
+            ErrorMessages = errors;
+            StatusCode = statusCode;
+        }
+
+
+
+        #region Custom
+        #endregion Custom
+
+
     }
-
-    public List<string> ErrorMessages { get; } = new();
-
-    public HttpStatusCode StatusCode { get; }
 }

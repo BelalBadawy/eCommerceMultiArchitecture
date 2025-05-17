@@ -1,29 +1,79 @@
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using eStoreCA.Shared.Common;
 using eStoreCA.Shared.Interfaces;
 
-namespace eStoreCA.Domain.Entities;
 
-public class Category : BaseEntity<Guid>, IAuditable, ISoftDelete, IDataConcurrency
+namespace eStoreCA.Domain.Entities
 {
-    public Guid Id { get; set; }
 
-    public string Title { get; set; }
+    public class Category : BaseEntity<Guid>, IAuditable, ISoftDelete, IDataConcurrency
+    {
 
-    public bool IsActive { get; set; }
+        public Category()
+        {
 
-    public Guid CreatedBy { get; set; }
+            #region Custom Constructor
+            #endregion Custom Constructor
 
-    [DataType(DataType.DateTime)] public DateTime CreatedAt { get; set; }
+        }
 
-    public Guid? LastModifiedBy { get; set; }
 
-    [DataType(DataType.DateTime)] public DateTime? LastModifiedAt { get; set; }
 
-    [Timestamp] public byte[] RowVersion { get; set; }
+        public Guid Id { get; set; }
 
-    public bool SoftDeleted { get; set; }
-    public Guid? DeletedBy { get; set; }
 
-    [DataType(DataType.DateTime)] public DateTime? DeletedAt { get; set; }
+
+        public string Title { get; set; }
+
+
+
+        public bool IsActive { get; set; }
+
+
+
+        public Guid CreatedBy { get; set; }
+
+
+
+        [DataType(DataType.DateTime)]
+        public DateTime CreatedAt { get; set; }
+
+
+
+        public Guid? LastModifiedBy { get; set; }
+
+
+
+        [DataType(DataType.DateTime)]
+        public DateTime? LastModifiedAt { get; set; }
+
+
+
+        [Timestamp]
+
+        public byte[] RowVersion { get; set; }
+
+
+
+        public bool SoftDeleted { get; set; }
+
+
+
+        public Guid? DeletedBy { get; set; }
+
+
+
+        [DataType(DataType.DateTime)]
+        public DateTime? DeletedAt { get; set; }
+
+
+
+
+        #region Custom
+        #endregion Custom
+
+    }
 }

@@ -1,8 +1,9 @@
 
 using eStoreCA.Domain.Entities;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
+using eStoreCA.Shared.Common;
 
 namespace eStoreCA.Infrastructure.Data.Initializer
 {
@@ -78,6 +79,9 @@ namespace eStoreCA.Infrastructure.Data.Initializer
             {
                 userManager.AddToRoleAsync(user, newRoleName).GetAwaiter().GetResult();
             }
+
+            #region Custom
+            #endregion Custom
 
         }
     }

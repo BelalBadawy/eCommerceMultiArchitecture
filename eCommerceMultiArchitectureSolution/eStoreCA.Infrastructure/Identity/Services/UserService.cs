@@ -30,22 +30,22 @@ namespace eStoreCA.Infrastructure.Identity.Services
 
         public async Task<MyAppResponse<Guid>> CreateUser(CreateUserDto request)
         {
-            // var newUserName = request.UserName.Trim();
+           // var newUserName = request.UserName.Trim();
 
+ 
+var existUser = await _userManager.FindByNameAsync(request.UserName.Trim());
 
-            var existUser = await _userManager.Users.FirstOrDefaultAsync(o => o.UserName == request.UserName.Trim());
-
-
+            
 
             if (existUser != null)
             {
                 return new MyAppResponse<Guid>(string.Format(SD.ExistData, request.UserName));
             }
 
+ 
+existUser = await _userManager.FindByEmailAsync(request.Email.Trim());
 
-            existUser = await _userManager.Users.FirstOrDefaultAsync(o => o.Email == request.Email.Trim());
-
-
+            
 
             if (existUser != null)
             {
@@ -55,19 +55,23 @@ namespace eStoreCA.Infrastructure.Identity.Services
             ApplicationUser applicationUser = new ApplicationUser();
 
             applicationUser.FullName = request.FullName.Trim();
-            applicationUser.Email = request.Email.Trim();
+            applicationUser.Email = request.Email.Trim(); 
             applicationUser.PhoneNumber = request.PhoneNumber.Trim();
             applicationUser.UserName = request.UserName.Trim();
             applicationUser.CreatedDate = DateTime.Now;
+
+ 
+
+            
 
             var result = await _userManager.CreateAsync(applicationUser);
 
             if (result.Succeeded)
             {
 
-                var newUser = await _userManager.Users.FirstOrDefaultAsync(o => o.Email == request.Email);
+var newUser = await _userManager.FindByEmailAsync(request.Email);
 
-
+                
 
                 if (request.Roles != null && request.Roles.Any())
                 {
@@ -99,10 +103,10 @@ namespace eStoreCA.Infrastructure.Identity.Services
         public async Task<MyAppResponse<bool>> DeleteUser(DeleteUserDto request)
         {
 
+            
+var result = await _userManager.FindByIdAsync(request.Id.ToString());
 
-            var result = await _userManager.Users.FirstOrDefaultAsync(o => o.Id == request.Id);
-
-
+            
 
             if (result != null)
             {
@@ -121,10 +125,10 @@ namespace eStoreCA.Infrastructure.Identity.Services
             List<ApplicationUser> result = null;
 
 
+  
+ result = await _userManager.Users.ToListAsync();
 
-            result = await _userManager.Users.ToListAsync();
-
-
+           
 
 
             if (result != null && result.Any())
@@ -222,9 +226,9 @@ namespace eStoreCA.Infrastructure.Identity.Services
             ApplicationUser result = null;
 
 
-            result = await _userManager.Users.FirstOrDefaultAsync(o => o.Id == request.Id);
+result = await _userManager.FindByIdAsync(request.Id.ToString());
 
-
+            
 
             if (result != null)
             {
@@ -248,10 +252,10 @@ namespace eStoreCA.Infrastructure.Identity.Services
         {
 
 
-            var originUser = await _userManager.Users.FirstOrDefaultAsync(o => o.Id == request.Id);
+var originUser = await _userManager.FindByIdAsync(request.Id.ToString());
 
 
-
+            
 
             if (originUser != null)
             {
@@ -330,9 +334,9 @@ namespace eStoreCA.Infrastructure.Identity.Services
         {
 
 
-            var originUser = await _userManager.Users.FirstOrDefaultAsync(o => o.Id == request.Id);
+var originUser = await _userManager.FindByIdAsync(request.Id.ToString());
 
-
+            
 
             if (originUser != null)
             {

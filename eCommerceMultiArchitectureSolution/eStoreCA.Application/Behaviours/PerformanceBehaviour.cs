@@ -38,13 +38,23 @@ namespace eStoreCA.Application.Behaviours
             {
                 var requestName = typeof(TRequest).Name;
                 var userId = _currentUserService.UserId?.ToString() ?? string.Empty;
-              
+
 
                 _logger.LogWarning("Long Running Request: {Name} ({ElapsedMilliseconds} milliseconds) {@UserId} {@Request}",
                     requestName, elapsedMilliseconds, userId, request);
             }
 
+
+
+
+            #region Custom
+            #endregion Custom
+
+
             return response;
         }
+
+
+
     }
 }

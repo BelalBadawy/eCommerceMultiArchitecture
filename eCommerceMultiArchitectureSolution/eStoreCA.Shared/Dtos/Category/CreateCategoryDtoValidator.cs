@@ -1,13 +1,21 @@
 using FluentValidation;
 
-namespace eStoreCA.Shared.Dtos;
-
-public class CreateCategoryDtoValidator : AbstractValidator<CreateCategoryDto>
+namespace eStoreCA.Shared.Dtos
 {
-    public CreateCategoryDtoValidator()
+    public class CreateCategoryDtoValidator : AbstractValidator<CreateCategoryDto>
     {
-        RuleFor(x => x.Id).NotEqual(Guid.Empty);
-        ;
-        RuleFor(o => o.Title).NotEmpty().MaximumLength(255);
+
+        public CreateCategoryDtoValidator()
+        {
+            RuleFor<Guid>(x => x.Id).NotEqual(Guid.Empty); ;
+            RuleFor(o => o.Title).NotEmpty().MaximumLength(255);
+
+            #region Custom Constructor
+            #endregion Custom Constructor
+
+        }
+        #region Custom
+        #endregion Custom
+
     }
 }

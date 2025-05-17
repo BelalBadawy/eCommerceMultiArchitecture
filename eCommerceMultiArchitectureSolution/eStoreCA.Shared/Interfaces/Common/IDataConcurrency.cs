@@ -1,8 +1,17 @@
+
 using System.ComponentModel.DataAnnotations;
 
-namespace eStoreCA.Shared.Interfaces;
-
-public interface IDataConcurrency
+namespace eStoreCA.Shared.Interfaces
 {
-    [Timestamp] public byte[] RowVersion { get; set; }
+    public interface IDataConcurrency
+    {
+        [Timestamp]
+        public byte[] RowVersion { get; set; }
+
+
+        #region Custom
+        #endregion Custom
+
+
+    }
 }

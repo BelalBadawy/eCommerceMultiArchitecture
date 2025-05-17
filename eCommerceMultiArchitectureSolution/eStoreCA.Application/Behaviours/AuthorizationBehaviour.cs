@@ -1,10 +1,11 @@
 
+using Mediator;
+using Microsoft.Extensions.Logging;
 using eStoreCA.Application.Attributes;
 using eStoreCA.Shared.Exceptions;
 using eStoreCA.Shared.Interfaces;
-using Mediator;
-using Microsoft.Extensions.Logging;
 using System.Reflection;
+using System.Text.Json;
 
 namespace eStoreCA.Application.Behaviours
 {
@@ -118,6 +119,10 @@ namespace eStoreCA.Application.Behaviours
             }
             return null;
         }
+
+
+
+
 
 
 

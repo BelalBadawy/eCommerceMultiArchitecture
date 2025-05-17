@@ -1,11 +1,19 @@
+
 using System.Net;
-
-namespace eStoreCA.Shared.Exceptions;
-
-[Serializable]
-public sealed class DomainException : CustomException
+namespace eStoreCA.Shared.Exceptions
 {
-    public DomainException(string message) : base(message, null, HttpStatusCode.NotFound)
+    [Serializable]
+    public sealed class DomainException : CustomException
     {
+        public DomainException(string message) : base(message, null, HttpStatusCode.BadRequest)
+        {
+        }
+
+
+
+        #region Custom
+        #endregion Custom
+
+
     }
 }

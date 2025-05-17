@@ -1,6 +1,16 @@
-namespace eStoreCA.Shared.Dtos;
 
-public class DeleteUserDto
+using System.ComponentModel.DataAnnotations;
+namespace eStoreCA.Shared.Dtos
 {
-    public Guid Id { get; set; }
+    public class DeleteUserDto
+    {
+        public Guid Id { get; set; }
+
+
+
+        #region Custom
+        #endregion Custom
+
+
+    }
 }

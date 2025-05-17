@@ -1,11 +1,6 @@
 
 using Dapper;
-using eStoreCA.Domain.Entities;
-using eStoreCA.Domain.Interfaces;
-using eStoreCA.Infrastructure.Common;
-using eStoreCA.Infrastructure.Extensions;
-using eStoreCA.Shared.Enums;
-using eStoreCA.Shared.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +8,12 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using eStoreCA.Domain.Entities;
+using eStoreCA.Application.Interfaces;
+using eStoreCA.Infrastructure.Common;
+using eStoreCA.Infrastructure.Extensions;
+using eStoreCA.Shared.Enums;
+using eStoreCA.Shared.Interfaces;
 using System.Data;
 using System.Reflection;
 
@@ -41,7 +42,6 @@ namespace eStoreCA.Infrastructure.Data
             _currentUserService = currentUserService;
             _loggerFactory = loggerFactory;
             _connectionString = this.Database.GetDbConnection().ConnectionString;
-           
             #region Custom Constructor
             #endregion Custom Constructor
 
@@ -62,6 +62,7 @@ namespace eStoreCA.Infrastructure.Data
 
             #region Custom Configuring
             #endregion Custom Configuring
+
 
             optionsBuilder.UseLoggerFactory(_loggerFactory);
         }

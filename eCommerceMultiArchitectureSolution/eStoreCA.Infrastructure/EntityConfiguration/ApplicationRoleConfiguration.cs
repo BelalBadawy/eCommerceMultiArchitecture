@@ -1,3 +1,5 @@
+
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using eStoreCA.Domain.Entities;
@@ -10,6 +12,8 @@ namespace eStoreCA.Infrastructure.EntityConfiguration
         {
             // Configure the primary key
             builder.HasKey(u => u.Id);
+
+
 
             // Table mapping (optional)
             builder.ToTable("AspNetRoles");

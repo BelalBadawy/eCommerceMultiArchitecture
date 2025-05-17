@@ -13,24 +13,40 @@ namespace eStoreCA.Application.Features.Queries
     [Authorize(Policy = AppPermissions.RolePermissions.List)]
     public class GetAllRoleWithoutClaimsQuery : IRequest<MyAppResponse<List<GetAllRoleWithoutClaimsDto>>>
     {
-        public Guid TenantId { get; set; }
+
+#region Custom Properties
+#endregion Custom Properties
+
+
+
     }
     #endregion
-
     #region GetAll Query Handler
     public class GetAllRoleWithoutClaimsQueryHandler : IRequestHandler<GetAllRoleWithoutClaimsQuery, MyAppResponse<List<GetAllRoleWithoutClaimsDto>>>
     {
+
         private readonly IRoleService _roleService;
 
         public GetAllRoleWithoutClaimsQueryHandler(IRoleService roleService)
         {
             _roleService = roleService;
+
+           
+#region Custom Constructor
+#endregion Custom Constructor
+
+
         }
 
         public async ValueTask<MyAppResponse<List<GetAllRoleWithoutClaimsDto>>> Handle(GetAllRoleWithoutClaimsQuery request, CancellationToken cancellationToken)
         {
-            return await _roleService.GetAllRolesWithoutClaims(request.TenantId);
-        }
+ 
+#region Custom
+#endregion Custom
+
+return await _roleService.GetAllRolesWithoutClaims();
+
+            }
     }
     #endregion
 }

@@ -1,4 +1,4 @@
-﻿namespace eStoreCA.Shared.Common
+namespace eStoreCA.Shared.Common
 {
     public class EmailConfiguration
     {
@@ -8,5 +8,8 @@
         public string Password { get; set; }
         public string DisplayName { get; set; }
         public bool EnableSsl { get; set; }
+
+        #region Custom
+        #endregion Custom
     }
 }
