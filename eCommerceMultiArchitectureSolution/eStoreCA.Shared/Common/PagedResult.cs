@@ -14,12 +14,12 @@ namespace eStoreCA.Shared.Common
 
         public bool HasNextPage => CurrentPage < TotalPages;
 
-        public List<T> Data { get; set; }
+        public List<T>? Data { get; set; }
 
-        public PagedResult(List<T> data = default, int count = 0, int page = 1, int pageSize = 10)
+        public PagedResult(List<T>? data = null, int count = 0, int pageIndex = 1, int pageSize = 10)
         {
             Data = data;
-            CurrentPage = page;
+            CurrentPage = pageIndex;
             PageSize = pageSize;
             TotalPages = (int)Math.Ceiling(count / (double)pageSize);
             TotalCount = count;
