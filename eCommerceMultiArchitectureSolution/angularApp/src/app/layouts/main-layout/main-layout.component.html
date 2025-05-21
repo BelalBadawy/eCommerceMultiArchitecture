@@ -1,0 +1,21 @@
+<div class="wrapper">
+  <!-- sidebar navigation component -->
+
+  <!-- end of sidebar component -->
+
+  <!-- end of navbar navigation -->
+  <app-sidebar
+    id="sidebar"
+    [class.active]="stateService.isActive()"
+  ></app-sidebar>
+
+  <div id="body" class="">
+    <!-- navbar navigation component -->
+    <app-header></app-header>
+    <div class="content">
+      <div class="container">
+        <router-outlet />
+      </div>
+    </div>
+  </div>
+</div>
