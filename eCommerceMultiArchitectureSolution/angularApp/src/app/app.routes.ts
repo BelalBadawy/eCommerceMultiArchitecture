@@ -1,3 +1,4 @@
+import { LoginComponent } from './features/auth/login/login.component';
 import { Routes } from '@angular/router';
 import { HomeComponent } from './features/home/home.component';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
@@ -32,10 +33,13 @@ export const routes: Routes = [
     path: 'auth',
     component: AuthLayoutComponent, // Uses auth layout
     children: [
-      // {
-      //   path: 'login',
-      //   // loadComponent: () => import('./features/auth/login.component'),
-      // },
+      {
+        path: 'login',
+        loadComponent: () =>
+          import('./features/auth/login/login.component').then(
+            (m) => m.LoginComponent
+          ),
+      },
       // {
       //   path: 'register',
       //   //  loadComponent: () => import('./features/auth/register.component'),
