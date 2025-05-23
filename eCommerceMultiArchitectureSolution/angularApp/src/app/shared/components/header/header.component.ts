@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { StateService } from '../../core/services/state-service';
+import { StateService } from '../../../core/services/state-service';
 
 @Component({
   selector: 'app-header',

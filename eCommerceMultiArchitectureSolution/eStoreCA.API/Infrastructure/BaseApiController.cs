@@ -11,24 +11,24 @@ using Microsoft.AspNetCore.Localization;
 using eStoreCA.Shared.Exceptions;
 namespace eStoreCA.API.Infrastructure
 {
-   
 
 
 
-   [Route("/api/v{version:apiVersion}/[controller]/[action]")]
+
+    [Route("/api/v{version:apiVersion}/[controller]/[action]")]
 
 
- 
 
 
-[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-[ApiController]
-[ProducesResponseType(StatusCodes.Status401Unauthorized)]
-[ProducesResponseType(StatusCodes.Status400BadRequest)]
-[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-   public class BaseApiController : ControllerBase
+
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [ApiController]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public class BaseApiController : ControllerBase
     {
-       private IConfiguration _configuration;
+        private IConfiguration _configuration;
         protected IConfiguration _ConfigurationApp
         {
             get
@@ -105,62 +105,62 @@ namespace eStoreCA.API.Infrastructure
         }
 
         [ApiExplorerSettings(IgnoreApi = true)]
-protected IActionResult ReturnActionResult(object result = null, bool succeeded = false, List<string> errors = null, string message = null, object data = null)
-{
-    if (bool.Parse(_ConfigurationApp["ReturnCustomResult"]))
-    {
-        if (result != null)
+        protected IActionResult ReturnActionResult(object result = null, bool succeeded = false, List<string> errors = null, string message = null, object data = null)
         {
-            return Ok(result);
-        }
-        else
-        {
-            if (errors != null)
+            if (bool.Parse(_ConfigurationApp["ReturnCustomResult"]))
             {
-                return Ok(new MyAppResponse<int>(errors: errors));
-            }
-            else
-            {
-                return Ok(new MyAppResponse<int>(message: message));
-            }
-        }
-    }
-    else
-    {
-        if (result != null)
-        {
-            if (succeeded)
-            {
-                return Ok(data);
-            }
-            else
-            {
-                if (errors != null && errors.Any())
+                if (result != null)
                 {
-                    return BadRequest(errors);
+                    return Ok(result);
                 }
                 else
                 {
-                    return BadRequest(message);
+                    if (errors != null)
+                    {
+                        return Ok(new MyAppResponse<int>(errors: errors));
+                    }
+                    else
+                    {
+                        return Ok(new MyAppResponse<int>(message: message));
+                    }
                 }
-            }
-        }
-        else
-        {
-            if (errors != null)
-            {
-                return BadRequest(string.Join(",", errors));
             }
             else
             {
-                return BadRequest(message);
+                if (result != null)
+                {
+                    if (succeeded)
+                    {
+                        return Ok(data);
+                    }
+                    else
+                    {
+                        if (errors != null && errors.Any())
+                        {
+                            return BadRequest(errors);
+                        }
+                        else
+                        {
+                            return BadRequest(message);
+                        }
+                    }
+                }
+                else
+                {
+                    if (errors != null)
+                    {
+                        return BadRequest(string.Join(",", errors));
+                    }
+                    else
+                    {
+                        return BadRequest(message);
+                    }
+                }
             }
         }
-    }
-}
 
 
-  public ObjectResult ActionResult<T>(MyAppResponse<T> response, Exception exception = null)
+        public ObjectResult ActionResult<T>(MyAppResponse<T> response, Exception exception = null)
         {
             if (response == null && exception == null)
             {
@@ -169,47 +169,97 @@ protected IActionResult ReturnActionResult(object result = null, bool succeeded 
 
             if (exception != null)
             {
-                if (exception is ForbiddenAccessException)
+                if (bool.Parse(_ConfigurationApp["ReturnCustomResult"]))
                 {
-                    return ActionResult(new MyAppResponse<bool>(message: exception.Message, statusCode: HttpStatusCode.Unauthorized));
-                }
-                else if (exception is BadRequestException)
-                {
-                    return ActionResult(new MyAppResponse<bool>(message: exception.Message, statusCode: HttpStatusCode.BadRequest));
-                }
-                else if (exception is NotFoundException)
-                {
-                    return ActionResult(new MyAppResponse<bool>(message: exception.Message, statusCode: HttpStatusCode.NotFound));
+                    if (exception is ForbiddenAccessException)
+                    {
+                        return ActionResult(new MyAppResponse<bool>(message: exception.Message,
+                            statusCode: HttpStatusCode.Unauthorized));
+                    }
+                    else if (exception is BadRequestException)
+                    {
+                        return ActionResult(new MyAppResponse<bool>(message: exception.Message,
+                            statusCode: HttpStatusCode.BadRequest));
+                    }
+                    else if (exception is NotFoundException)
+                    {
+                        return ActionResult(new MyAppResponse<bool>(message: exception.Message,
+                            statusCode: HttpStatusCode.NotFound));
+                    }
+                    else
+                    {
+                        return new BadRequestObjectResult(SD.ErrorOccurred);
+                    }
                 }
                 else
                 {
-                    return new BadRequestObjectResult(SD.ErrorOccurred);
+                    if (exception is ForbiddenAccessException)
+                    {
+                        return new UnauthorizedObjectResult(exception.Message);
+                    }
+                    else if (exception is BadRequestException)
+                    {
+                        return new BadRequestObjectResult(exception.Message);
+                    }
+                    else if (exception is NotFoundException)
+                    {
+                        return new NotFoundObjectResult(exception.Message);
+                    }
+                    else
+                    {
+                        return new BadRequestObjectResult(SD.ErrorOccurred);
+                    }
                 }
             }
 
-            switch (response.StatusCode)
+            if (bool.Parse(_ConfigurationApp["ReturnCustomResult"]))
             {
-                case HttpStatusCode.OK:
-                    return new OkObjectResult(response);
-                case HttpStatusCode.Created:
-                    return new CreatedResult(string.Empty, response);
-                case HttpStatusCode.Unauthorized:
-                    return new UnauthorizedObjectResult(response);
-                case HttpStatusCode.BadRequest:
-                    return new BadRequestObjectResult(response);
-                case HttpStatusCode.NotFound:
-                    return new NotFoundObjectResult(response);
-                case HttpStatusCode.Accepted:
-                    return new AcceptedResult(string.Empty, response);
-                case HttpStatusCode.UnprocessableEntity:
-                    return new UnprocessableEntityObjectResult(response);
-                default:
-                    return new BadRequestObjectResult(response);
+                switch (response.StatusCode)
+                {
+                    case HttpStatusCode.OK:
+                        return new OkObjectResult(response);
+                    case HttpStatusCode.Created:
+                        return new CreatedResult(string.Empty, response);
+                    case HttpStatusCode.Unauthorized:
+                        return new UnauthorizedObjectResult(response);
+                    case HttpStatusCode.BadRequest:
+                        return new BadRequestObjectResult(response);
+                    case HttpStatusCode.NotFound:
+                        return new NotFoundObjectResult(response);
+                    case HttpStatusCode.Accepted:
+                        return new AcceptedResult(string.Empty, response);
+                    case HttpStatusCode.UnprocessableEntity:
+                        return new UnprocessableEntityObjectResult(response);
+                    default:
+                        return new BadRequestObjectResult(response);
+                }
+            }
+            else
+            {
+                switch (response.StatusCode)
+                {
+                    case HttpStatusCode.OK:
+                        return new OkObjectResult(response.Data);
+                    case HttpStatusCode.Created:
+                        return new CreatedResult(string.Empty, response.Data);
+                    case HttpStatusCode.Unauthorized:
+                        return new UnauthorizedObjectResult(response.Message);
+                    case HttpStatusCode.BadRequest:
+                        return new BadRequestObjectResult(response.Message);
+                    case HttpStatusCode.NotFound:
+                        return new NotFoundObjectResult(response.Message);
+                    case HttpStatusCode.Accepted:
+                        return new AcceptedResult(string.Empty, response.Data);
+                    case HttpStatusCode.UnprocessableEntity:
+                        return new UnprocessableEntityObjectResult(response.Message);
+                    default:
+                        return new BadRequestObjectResult(response.Message);
+                }
             }
         }
-	
-#region Custom
-#endregion Custom
 
-}
+        #region Custom
+        #endregion Custom
+
+    }
 }

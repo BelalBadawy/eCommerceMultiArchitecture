@@ -1,8 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { StateService } from '../../core/services/state-service';
 import { RouterOutlet } from '@angular/router';
-import { HeaderComponent } from '../../shell/header/header.component';
-import { SidebarComponent } from '../../shell/sidebar/sidebar.component';
+import { HeaderComponent } from '../../shared/components/header/header.component';
+import { SidebarComponent } from '../../shared/components/sidebar/sidebar.component';
 
 @Component({
   selector: 'app-main-layout',

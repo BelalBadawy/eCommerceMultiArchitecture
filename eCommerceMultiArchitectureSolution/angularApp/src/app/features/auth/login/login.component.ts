@@ -2,7 +2,9 @@ import { Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { inject, signal, Component } from '@angular/core';
 import { AuthService } from '../auth.service';
-
+import { HttpErrorResponse } from '@angular/common/http';
+import { MyAppResponse } from '../../../core/models/common-models';
+import { handleApiError } from '../../../core/services/error.utils';
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -41,7 +43,7 @@ export class LoginComponent {
       });
 
       if (response.succeeded) {
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/home']);
       } else {
         this.error.set(
           response.message ||
@@ -49,12 +51,8 @@ export class LoginComponent {
             'Login failed. Please try again.'
         );
       }
-    } catch (err) {
-      this.error.set(
-        err instanceof Error
-          ? err.message
-          : 'An unexpected error occurred during login'
-      );
+    } catch (err: unknown) {
+      handleApiError(err, this.error, 'Login');
     } finally {
       this.loading.set(false);
     }
