@@ -1,4 +1,5 @@
 import { LoginComponent } from './features/auth/login/login.component';
+import { RegisterComponent } from './features/auth/register/register.component';
 import { Routes } from '@angular/router';
 import { HomeComponent } from './features/home/home.component';
 import { MainLayoutComponent } from './layouts/main-layout/main-layout.component';
@@ -40,10 +41,20 @@ export const routes: Routes = [
             (m) => m.LoginComponent
           ),
       },
-      // {
-      //   path: 'register',
-      //   //  loadComponent: () => import('./features/auth/register.component'),
-      // },
+      {
+        path: 'register',
+        loadComponent: () =>
+          import('./features/auth/register/register.component').then(
+            (m) => m.RegisterComponent
+          ),
+      },
+      {
+        path: 'forgot-password',
+        loadComponent: () =>
+          import(
+            './features/auth/forgot-password/forgot-password.component'
+          ).then((m) => m.ForgotPasswordComponent),
+      },
     ],
   },
 

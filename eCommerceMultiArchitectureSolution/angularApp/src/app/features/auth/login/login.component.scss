@@ -55,7 +55,7 @@ body {
 [3. Cards / .card]
 */
 .auth-content .card {
-  box-shadow: 0 .125rem .5rem rgba(0, 0, 0, .04);
+  box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.04);
   border: 1px solid #eaedf1;
   border-radius: 5.2px;
   overflow: hidden;
@@ -378,8 +378,8 @@ p.text-muted {
 .form-control,
 .form-select {
   border-radius: 3px;
-  border: 2px solid #E0E0E0;
-  background-color: #FAFAFA !important;
+  border: 2px solid #e0e0e0;
+  background-color: #fafafa !important;
   box-shadow: none !important;
 }
 
@@ -391,7 +391,7 @@ p.text-muted {
 .form-select:focus {
   box-shadow: none !important;
   border: 2px solid #1e84c4;
-  background-color: #FAFAFA;
+  background-color: #fafafa;
 }
 
 .form-check-input:focus {
@@ -419,7 +419,7 @@ p.text-muted {
 }
 
 .wrapper a,
-.wrapper p>a {
+.wrapper p > a {
   color: #3e8ef7;
   font-weight: 600;
 }

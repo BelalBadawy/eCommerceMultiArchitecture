@@ -4,6 +4,9 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { MyAppResponse } from '../../core/models/common-models';
+import { jwtDecode, JwtPayload } from 'jwt-decode';
+import { RegistrationDto } from './models/auth-model';
 
 // Types
 interface User {
@@ -30,15 +33,6 @@ export interface AuthenticationResponse {
   refreshTokenExpiration: Date;
 }
 
-export interface MyAppResponse<T> {
-  statusCode: number;
-  succeeded: boolean;
-  message?: string;
-  errors?: string[];
-  data?: T;
-  redirectTo?: string;
-}
-
 @Injectable({
   providedIn: 'root',
 })
@@ -60,12 +54,16 @@ export class AuthService {
   token = computed(() => this._state().token);
   refreshToken = computed(() => this._state().refreshToken);
   refreshTokenExpiration = computed(() => this._state().refreshTokenExpiration);
-  isAuthenticated = computed(() => this._state().isAuthenticated);
+  isAuthenticated = computed(() => {
+    const state = this._state();
+    return state.isAuthenticated && this.isTokenValid(state.token);
+  });
 
   constructor() {
     this.initializeFromStorage();
   }
 
+  /* ========== STATE MANAGEMENT ========== */
   private initializeFromStorage(): void {
     const token = localStorage.getItem('access_token');
     const refreshToken = localStorage.getItem('refresh_token');
@@ -74,7 +72,7 @@ export class AuthService {
     );
     const user = localStorage.getItem('user');
 
-    if (token && user) {
+    if (token && user && this.isTokenValid(token)) {
       this._state.update((state) => ({
         ...state,
         token,
@@ -85,6 +83,8 @@ export class AuthService {
         user: JSON.parse(user),
         isAuthenticated: true,
       }));
+    } else {
+      this.clearAuthStorage();
     }
   }
 
@@ -94,11 +94,12 @@ export class AuthService {
     if (newState.token) localStorage.setItem('access_token', newState.token);
     if (newState.refreshToken)
       localStorage.setItem('refresh_token', newState.refreshToken);
-    if (newState.refreshTokenExpiration)
+    if (newState.refreshTokenExpiration) {
       localStorage.setItem(
         'refresh_token_expiration',
         newState.refreshTokenExpiration.toISOString()
       );
+    }
     if (newState.user)
       localStorage.setItem('user', JSON.stringify(newState.user));
 
@@ -110,6 +111,74 @@ export class AuthService {
     if (newState.user === null) localStorage.removeItem('user');
   }
 
+  private clearAuthStorage(): void {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('refresh_token_expiration');
+    localStorage.removeItem('user');
+  }
+
+  /* ========== TOKEN VALIDATION ========== */
+  private isTokenValid(token: string | null): boolean {
+    if (!token) return false;
+    try {
+      const decoded = jwtDecode<JwtPayload>(token);
+      return !!decoded.exp && decoded.exp * 1000 > Date.now();
+    } catch {
+      return false;
+    }
+  }
+
+  isTokenAboutToExpire(bufferSeconds: number = 300): boolean {
+    const token = this._state().token;
+    if (!token) return true;
+
+    try {
+      const decoded = jwtDecode<JwtPayload>(token);
+      return (
+        !decoded.exp || decoded.exp * 1000 - Date.now() < bufferSeconds * 1000
+      );
+    } catch {
+      return true;
+    }
+  }
+
+  getTokenExpiration(): Date | null {
+    const token = this._state().token;
+    if (!token) return null;
+
+    try {
+      const decoded = jwtDecode<JwtPayload>(token);
+      return decoded.exp ? new Date(decoded.exp * 1000) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  getTokenRoles(): string[] {
+    const token = this._state().token;
+    if (!token) return [];
+
+    try {
+      const decoded = jwtDecode<any>(token);
+      if (Array.isArray(decoded.roles)) return decoded.roles;
+      if (decoded.roles) return [decoded.roles];
+      if (
+        decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']
+      ) {
+        const roles =
+          decoded[
+            'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'
+          ];
+        return Array.isArray(roles) ? roles : [roles];
+      }
+      return [];
+    } catch {
+      return [];
+    }
+  }
+
+  /* ========== AUTH METHODS ========== */
   async login(credentials: {
     email: string;
     password: string;
@@ -144,50 +213,68 @@ export class AuthService {
     return response;
   }
 
-  async refreshTokenApi(): Promise<MyAppResponse<AuthenticationResponse>> {
-    const refreshToken = this._state().refreshToken;
-    if (!refreshToken) {
-      throw new Error('No refresh token available');
-    }
-
-    const refreshToken$ = this.http.get<MyAppResponse<AuthenticationResponse>>(
-      `${environment.apiRoot}/v1/Account/RefreshToken?refreshToken=${refreshToken}`
+  async register(credentials: RegistrationDto): Promise<MyAppResponse<string>> {
+    const register$ = this.http.post<MyAppResponse<string>>(
+      `${environment.apiRoot}/v1/Account/Register`,
+      credentials
     );
 
-    const response = await firstValueFrom(refreshToken$);
-
-    if (response.succeeded && response.data) {
-      const {
-        id,
-        userName,
-        email,
-        token,
-        refreshToken: newRefreshToken,
-        refreshTokenExpiration,
-      } = response.data;
-
-      this.updateState({
-        user: { id, userName, email },
-        token,
-        refreshToken: newRefreshToken,
-        refreshTokenExpiration: new Date(refreshTokenExpiration),
-        isAuthenticated: true,
-      });
-    }
-
-    return response;
+    return await firstValueFrom(register$);
   }
 
-  // Other methods remain the same as previous implementation
-  // (register, confirmEmail, forgotPassword, etc.)
-  // ...
+  async forgotPassword(email: string): Promise<MyAppResponse<boolean>> {
+    const forgotPassword$ = this.http.post<MyAppResponse<boolean>>(
+      `${environment.apiRoot}/v1/Account/ForgotPassword?email={email}`,
+      {}
+    );
+
+    return await firstValueFrom(forgotPassword$);
+  }
+
+  async refreshTokenApi(): Promise<boolean> {
+    const refreshToken = this._state().refreshToken;
+    if (!refreshToken || !this.isTokenValid(refreshToken)) {
+      this.logout();
+      return false;
+    }
+
+    try {
+      const response = await firstValueFrom(
+        this.http.get<MyAppResponse<AuthenticationResponse>>(
+          `${environment.apiRoot}/v1/Account/RefreshToken?refreshToken=${refreshToken}`
+        )
+      );
+
+      if (response.succeeded && response.data) {
+        const {
+          id,
+          userName,
+          email,
+          token,
+          refreshToken: newRefreshToken,
+          refreshTokenExpiration,
+        } = response.data;
+        this.updateState({
+          user: { id, userName, email },
+          token,
+          refreshToken: newRefreshToken,
+          refreshTokenExpiration: new Date(refreshTokenExpiration),
+          isAuthenticated: true,
+        });
+        return true;
+      }
+      return false;
+    } catch {
+      this.logout();
+      return false;
+    }
+  }
 
   logout(): void {
     const token = this._state().token;
     if (token) {
       this.revokeToken(token).catch(console.error);
     }
-
     this.updateState({
       user: null,
       token: null,
@@ -196,7 +283,8 @@ export class AuthService {
       isAuthenticated: false,
     });
 
-    this.router.navigate(['/login']);
+    this.clearAuthStorage();
+    this.router.navigate(['/auth/login']);
   }
 
   private async revokeToken(token: string): Promise<MyAppResponse<void>> {
@@ -207,12 +295,12 @@ export class AuthService {
     return firstValueFrom(revokeToken$);
   }
 
-  // Role checks
+  /* ========== ROLE CHECKS ========== */
   hasRole(role: string): boolean {
-    return this._state().user?.roles?.includes(role) || false;
+    return this.getTokenRoles().includes(role);
   }
 
   hasAnyRole(roles: string[]): boolean {
-    return roles.some((role) => this.hasRole(role));
+    return this.getTokenRoles().some((role) => roles.includes(role));
   }
 }

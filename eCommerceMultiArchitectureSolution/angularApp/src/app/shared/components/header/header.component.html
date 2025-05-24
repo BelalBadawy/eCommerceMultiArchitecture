@@ -54,6 +54,8 @@
         </div>
       </li>
       <li class="nav-item dropdown">
+        @if (authService.isAuthenticated()) {
+        <!-- Show user dropdown when authenticated -->
         <div class="nav-dropdown">
           <a
             href="#"
@@ -62,7 +64,8 @@
             data-bs-toggle="dropdown"
             aria-expanded="false"
           >
-            <i class="fas fa-user"></i> <span>John Doe</span>
+            <i class="fas fa-user"></i>
+            <span>{{ authService.user()?.userName || "User" }}</span>
             <i style="font-size: 0.8em" class="fas fa-caret-down"></i>
           </a>
           <div class="dropdown-menu dropdown-menu-end nav-link-menu">
@@ -84,13 +87,21 @@
               </li>
               <div class="dropdown-divider"></div>
               <li>
-                <a href="" class="dropdown-item"
+                <a class="dropdown-item" (click)="authService.logout()"
                   ><i class="fas fa-sign-out-alt"></i> Logout</a
                 >
               </li>
             </ul>
           </div>
         </div>
+        } @else {
+        <div class="nav-dropdown">
+          <!-- Show login link when not authenticated -->
+          <a class="nav-item nav-link text-secondary" routerLink="/auth/login">
+            <i class="fas fa-sign-in-alt"></i> Login
+          </a>
+        </div>
+        }
       </li>
     </ul>
   </div>

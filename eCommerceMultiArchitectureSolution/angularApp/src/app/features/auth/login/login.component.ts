@@ -1,6 +1,6 @@
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { inject, signal, Component } from '@angular/core';
+import { inject, signal, Component, OnInit } from '@angular/core';
 import { AuthService } from '../auth.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MyAppResponse } from '../../../core/models/common-models';
@@ -9,13 +9,14 @@ import { handleApiError } from '../../../core/services/error.utils';
   selector: 'app-login',
   standalone: true,
   imports: [
-    ReactiveFormsModule, // Only needed for form directives
+    ReactiveFormsModule,
+    RouterLink, // Only needed for form directives
     // No CommonModule needed!
   ],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss'],
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   authService = inject(AuthService);
   fb = inject(FormBuilder);
   router = inject(Router);
@@ -28,6 +29,25 @@ export class LoginComponent {
     password: ['', Validators.required],
     rememberMe: [false],
   });
+
+  // onInit() {
+  //   if (this.authService.isAuthenticated()) {
+  //     this.router.navigate(['/home']);
+  //   }
+  // }
+
+  ngOnInit(): void {
+    // Redirect to home if alrea
+    // debugerdy authenticated
+    debugger;
+    if (
+      this.authService.isAuthenticated &&
+      this.authService.isAuthenticated()
+    ) {
+      console.log('Already authenticated redirect to home');
+      this.router.navigate(['/home']);
+    }
+  }
 
   async onSubmit() {
     if (this.loginForm.invalid) return;
