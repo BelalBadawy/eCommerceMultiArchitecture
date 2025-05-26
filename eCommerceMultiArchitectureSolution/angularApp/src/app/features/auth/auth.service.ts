@@ -224,7 +224,7 @@ export class AuthService {
 
   async forgotPassword(email: string): Promise<MyAppResponse<boolean>> {
     const forgotPassword$ = this.http.post<MyAppResponse<boolean>>(
-      `${environment.apiRoot}/v1/Account/ForgotPassword?email={email}`,
+      `${environment.apiRoot}/v1/Account/ForgotPassword?email=${email}`,
       {}
     );
 

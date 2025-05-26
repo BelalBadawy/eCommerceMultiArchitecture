@@ -5,6 +5,7 @@ import { AuthService } from '../auth.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MyAppResponse } from '../../../core/models/common-models';
 import { handleApiError } from '../../../core/services/error.utils';
+import { ToasterService } from '../../../core/services/toaster.service';
 
 @Component({
   selector: 'app-forgot-password',
@@ -19,6 +20,8 @@ export class ForgotPasswordComponent {
 
   loading = signal(false);
   error = signal<string | null>(null);
+
+  private toaster = inject(ToasterService);
 
   fpForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -36,6 +39,7 @@ export class ForgotPasswordComponent {
       );
 
       if (response.succeeded) {
+        this.toaster.showSuccess('Password reset email sent.');
         this.router.navigate(['/auth/login']);
       } else {
         this.error.set(
@@ -43,9 +47,14 @@ export class ForgotPasswordComponent {
             response.errors?.join(', ') ||
             'Login failed. Please try again.'
         );
+
+        this.toaster.showError(
+          this.error() || 'Reset Password failed. Please try again.'
+        );
       }
     } catch (err: unknown) {
-      handleApiError(err, this.error, 'Login');
+      let errorMsg = handleApiError(err, this.error, 'Login');
+      this.toaster.showError(errorMsg);
     } finally {
       this.loading.set(false);
     }
