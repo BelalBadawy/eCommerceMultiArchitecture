@@ -41,4 +41,11 @@ export interface AuthenticationResponse {
   refreshTokenExpiration: Date;
 }
 
+export interface ResetPasswordDto {
+  token: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
 // Add other DTO interfaces as needed

@@ -1,1 +1,96 @@
-<p>confirm-email works!</p>
+<div class="wrapper">
+  <div class="card">
+    <div class="card-body text-center">
+      <!-- Logo -->
+      <div class="mb-4">
+        <img
+          class="brand"
+          src="assets/img/bootstraper-logo.png"
+          alt="bootstraper logo"
+        />
+      </div>
+
+      <!-- Processing State -->
+      @if (confirmationStatus() === 'processing') {
+      <h6 class="mb-4 text-muted">Confirming Email</h6>
+      <div class="mb-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+      <p class="text-muted">
+        Please wait while we confirm your email address...
+      </p>
+      }
+
+      <!-- Success State -->
+      @if (confirmationStatus() === 'success') {
+      <h6 class="mb-4 text-success">Email Confirmed Successfully!</h6>
+      <div class="mb-4">
+        <i class="fas fa-check-circle text-success" style="font-size: 3rem"></i>
+      </div>
+      <p class="text-muted mb-4">
+        Your email address has been successfully confirmed. You can now log in
+        to your account.
+      </p>
+      <button
+        class="btn btn-primary mb-4"
+        style="width: 100%"
+        type="button"
+        (click)="navigateToLogin()"
+      >
+        Go to Login
+      </button>
+      }
+
+      <!-- Error State -->
+      @if (confirmationStatus() === 'error') {
+      <h6 class="mb-4 text-danger">Email Confirmation Failed</h6>
+      <div class="mb-4">
+        <i class="fas fa-times-circle text-danger" style="font-size: 3rem"></i>
+      </div>
+
+      @if (error()) {
+      <div class="alert alert-danger mb-3" role="alert">
+        {{ error() }}
+      </div>
+      }
+
+      <p class="text-muted mb-4">
+        The confirmation link may have expired or is invalid. You can request a
+        new confirmation email below.
+      </p>
+
+      @if (email()) {
+      <button
+        class="btn btn-primary mb-3"
+        style="width: 100%"
+        type="button"
+        [disabled]="loading()"
+        (click)="resendEMailConfirmation()"
+      >
+        @if (loading()) {
+        <span
+          class="spinner-border spinner-border-sm me-2"
+          aria-hidden="true"
+        ></span>
+        Sending... } @else { Resend Confirmation Email }
+      </button>
+      }
+
+      <button
+        class="btn btn-outline-secondary mb-4"
+        style="width: 100%"
+        type="button"
+        (click)="navigateToLogin()"
+      >
+        Back to Login
+      </button>
+      }
+
+      <p class="mb-0 text-muted">
+        Need help? <a href="mailto:support@example.com">Contact Support</a>
+      </p>
+    </div>
+  </div>
+</div>

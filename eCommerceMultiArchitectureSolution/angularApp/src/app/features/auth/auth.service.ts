@@ -6,7 +6,7 @@ import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { MyAppResponse } from '../../core/models/common-models';
 import { jwtDecode, JwtPayload } from 'jwt-decode';
-import { RegistrationDto } from './models/auth-model';
+import { RegistrationDto, ResetPasswordDto } from './models/auth-model';
 
 // Types
 interface User {
@@ -293,6 +293,46 @@ export class AuthService {
       { token }
     );
     return firstValueFrom(revokeToken$);
+  }
+
+  async confirmEmail(
+    email: string,
+    token: string
+  ): Promise<MyAppResponse<boolean>> {
+    const confirmEmail$ = this.http.post<MyAppResponse<boolean>>(
+      `${environment.apiRoot}/v1/Account/ConfirmEmail`,
+      {
+        email,
+        token,
+      }
+    );
+
+    const apiResponse = await firstValueFrom(confirmEmail$);
+    return apiResponse;
+  }
+
+  async resendEMailConfirmation(
+    email: string
+  ): Promise<MyAppResponse<boolean>> {
+    const confirmEmail$ = this.http.post<MyAppResponse<boolean>>(
+      `${environment.apiRoot}/v1/Account/ResendEMailConfirmationLink?email=${email}`,
+      {}
+    );
+
+    const apiResponse = await firstValueFrom(confirmEmail$);
+    return apiResponse;
+  }
+
+  async resetPassword(
+    resetPasswordModel: ResetPasswordDto
+  ): Promise<MyAppResponse<boolean>> {
+    const resetPassword$ = this.http.post<MyAppResponse<boolean>>(
+      `${environment.apiRoot}/v1/Account/ResetPassword`,
+      resetPasswordModel
+    );
+    const apiResponse = await firstValueFrom(resetPassword$);
+
+    return apiResponse;
   }
 
   /* ========== ROLE CHECKS ========== */
