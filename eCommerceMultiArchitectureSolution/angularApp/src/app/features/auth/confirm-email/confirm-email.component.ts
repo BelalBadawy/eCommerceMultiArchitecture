@@ -26,15 +26,20 @@ export class ConfirmEmailComponent implements OnInit {
     this.route.queryParams.subscribe((params) => {
       const token = params['token'];
       const email = params['email'];
-
-      if (token && email) {
-        this.email.set(email);
-        this.confirmEmail(token, email);
-      } else {
-        this.confirmationStatus.set('error');
-        this.error.set(
-          'Invalid confirmation link. Please check your email for the correct link.'
-        );
+      try {
+        if (token && email) {
+          this.email.set(email);
+          this.confirmEmail(token, email);
+        } else {
+          this.confirmationStatus.set('error');
+          this.error.set(
+            'Invalid confirmation link. Please check your email for the correct link.'
+          );
+          this.loading.set(false);
+        }
+      } catch (err: unknown) {
+        handleApiError(err, this.error, 'Login');
+      } finally {
         this.loading.set(false);
       }
     });
@@ -62,7 +67,7 @@ export class ConfirmEmailComponent implements OnInit {
       let errorMsg = handleApiError(err, this.error, 'Login');
       this.confirmationStatus.set('error');
       this.error.set('An unexpected error occurred. Please try again later.');
-      this.toasterService.showError(err);
+      this.toasterService.showError(errorMsg);
     } finally {
       this.loading.set(false);
     }
@@ -97,9 +102,6 @@ export class ConfirmEmailComponent implements OnInit {
   }
 
   navigateToLogin(): void {
-    this.router.navigate(['/login'], {
-      queryParams:
-        this.confirmationStatus() === 'success' ? { email: this.email() } : {},
-    });
+    this.router.navigate(['auth/login']);
   }
 }

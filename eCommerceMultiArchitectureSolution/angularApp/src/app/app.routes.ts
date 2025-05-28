@@ -1,3 +1,4 @@
+import { CategoryListComponent } from './features/categories/category-list/category-list.component';
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
 import { Routes } from '@angular/router';
@@ -16,11 +17,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/home/home.component').then((m) => m.HomeComponent),
       },
-      // {
-      //   path: 'products',
-      //   loadComponent: () =>
-      //     import('./features/products/product-list.component'),
-      // },
+      {
+        path: 'categories',
+        loadComponent: () =>
+          import(
+            './features/categories/category-list/category-list.component'
+          ).then((m) => m.CategoryListComponent),
+      },
       // {
       //   path: 'cart',
       //   loadComponent: () => import('./features/cart/cart.component'),

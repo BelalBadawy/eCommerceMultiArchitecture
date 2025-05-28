@@ -215,7 +215,7 @@ export class AuthService {
 
   async register(credentials: RegistrationDto): Promise<MyAppResponse<string>> {
     const register$ = this.http.post<MyAppResponse<string>>(
-      `${environment.apiRoot}/v1/Account/Register`,
+      `${environment.apiRoot}/v1/Account/RegisterAccount`,
       credentials
     );
 

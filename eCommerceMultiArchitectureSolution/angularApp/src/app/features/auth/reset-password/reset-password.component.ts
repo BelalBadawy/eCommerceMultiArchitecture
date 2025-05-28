@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { AuthService } from '../auth.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
   FormGroup,
   FormBuilder,
@@ -15,7 +15,7 @@ import { handleApiError } from '../../../core/services/error.utils';
 
 @Component({
   selector: 'app-reset-password',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './reset-password.component.html',
   styleUrl: './reset-password.component.scss',
 })
