@@ -14,6 +14,7 @@ using eStoreCA.Shared.Dtos;
 
 
 using System.Globalization;
+using Microsoft.AspNetCore.Authorization;
 
 namespace eStoreCA.API.Controllers
 {
@@ -63,6 +64,7 @@ namespace eStoreCA.API.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(MyAppResponse<PagedResult<GetAllByPageCategoryDto>>))]
         public async Task<IActionResult> GetAllPagedList(string searchValue = "", string orderBy = "", bool orderAscendingDirection = true, int pageIndex = 1, int pageSize = 10)

@@ -16,7 +16,7 @@ namespace eStoreCA.Application.Features.Queries
 
 {
     #region GetAllByPage Query Parameters
-    [Authorize(Policy = AppPermissions.CategoryPermissions.List)]
+ //   [Authorize(Policy = AppPermissions.CategoryPermissions.List)]
     public class GetAllByPageCategoryQuery : GetAllByPageCategoryQueryDto, IRequest<MyAppResponse<PagedResult<GetAllByPageCategoryDto>>>
     {
 

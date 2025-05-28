@@ -85,6 +85,75 @@ namespace eStoreCA.Infrastructure.Data
                 }
             }
 
+            #region Seeding Data
+
+            #region Categories
+
+            var createdAt = new DateTime(2024, 01, 01);
+            var createdBy = Guid.Parse("11111111-1111-1111-1111-111111111111"); // Replace with your admin/system user ID
+
+            modelBuilder.Entity<Category>().HasData(
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000001"), Title = "Electronics", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000002"), Title = "Clothing", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000003"), Title = "Footwear", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000004"), Title = "Home & Kitchen", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000005"), Title = "Beauty & Personal Care", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000006"), Title = "Books", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000007"), Title = "Health & Wellness", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000008"), Title = "Toys & Games", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000009"), Title = "Jewelry", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000010"), Title = "Watches", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000011"), Title = "Sports & Outdoors", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000012"), Title = "Automotive", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000013"), Title = "Furniture", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000014"), Title = "Office Supplies", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000015"), Title = "Pet Supplies", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000016"), Title = "Baby Products", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000017"), Title = "Garden & Outdoors", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000018"), Title = "Tools & Hardware", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000019"), Title = "Musical Instruments", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000020"), Title = "Groceries", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000021"), Title = "Stationery", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000022"), Title = "Travel Accessories", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000023"), Title = "Bags & Luggage", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000024"), Title = "Mobile Accessories", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000025"), Title = "Camera & Photography", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000026"), Title = "Smart Home Devices", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000027"), Title = "Kitchen Appliances", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000028"), Title = "Cleaning Supplies", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000029"), Title = "Bath Accessories", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000030"), Title = "DIY & Crafts", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000031"), Title = "Gaming", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000032"), Title = "Nutrition & Supplements", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000033"), Title = "Lighting", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000034"), Title = "Home Decor", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000035"), Title = "Wall Art", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000036"), Title = "Curtains & Blinds", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000037"), Title = "Mattresses & Bedding", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000038"), Title = "Event & Party Supplies", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000039"), Title = "Costumes & Accessories", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000040"), Title = "Seasonal Décor", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000041"), Title = "Green & Eco Products", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000042"), Title = "Industrial Supplies", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000043"), Title = "Safety & Security", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000044"), Title = "Lab & Scientific Supplies", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000045"), Title = "Collectibles", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000046"), Title = "Antiques", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000047"), Title = "Luxury Goods", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000048"), Title = "Digital Products", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000049"), Title = "Subscription Boxes", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false },
+                new Category { Id = Guid.Parse("a1111111-1111-1111-1111-000000000050"), Title = "3D Printing Supplies", IsActive = true, CreatedBy = createdBy, CreatedAt = createdAt, SoftDeleted = false }
+            );
+
+
+            #endregion
+
+
+            #endregion
 
             #region Custom ModelCreating
             #endregion Custom ModelCreating
