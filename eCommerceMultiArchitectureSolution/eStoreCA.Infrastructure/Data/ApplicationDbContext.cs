@@ -54,7 +54,6 @@ namespace eStoreCA.Infrastructure.Data
         public virtual DbSet<AuditTrailLog> AuditTrailLogs { get; set; }
         public virtual DbSet<LogUserActivity> LogUserActivities { get; set; }
         public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
-        public virtual DbSet<Country> Countries { get; set; }
         public virtual DbSet<Category> Categories { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

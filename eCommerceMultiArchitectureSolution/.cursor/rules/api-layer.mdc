@@ -1,0 +1,295 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# API Layer Guide (`eStoreCA.API`)
+
+## Purpose
+This layer contains controllers, middleware, and API configuration, serving as the entry point for client applications.
+
+## Rules
+- **Controllers inherit from BaseApiController**
+- **Use API versioning**
+- **Apply proper HTTP status codes**
+- **Implement proper error handling**
+- **Use Swagger for documentation**
+
+## 11. Add API Controller
+
+**Location**: `eStoreCA.API/Controllers/{EntityName}Controller.cs`
+
+### Complete Controller Example:
+
+```csharp
+[ApiVersion("1.0")]
+public class {EntityName}Controller : BaseApiController
+{
+    public {EntityName}Controller()
+    {
+    }
+
+    [HttpGet]
+    [ProducesResponseType(200, Type = typeof(MyAppResponse<List<GetAll{EntityName}Dto>>))]
+    public async Task<IActionResult> GetAll(string searchValue = "", string orderBy = "", bool orderAscendingDirection = true)
+    {
+        try
+        {
+            bool byPassCache = true;
+
+            if (string.IsNullOrEmpty(searchValue))
+            {
+                byPassCache = false;
+            }
+
+            var result = await _Mediator.Send(new GetAll{EntityName}Query()
+            {
+                Search = searchValue,
+                SortColumnName = orderBy,
+                AscendingOrder = orderAscendingDirection,
+                BypassCache = byPassCache
+            });
+
+            return ActionResult(result);
+        }
+        catch (Exception ex)
+        {
+            return ActionResult<string>(null, ex);
+        }
+    }
+
+    [AllowAnonymous]
+    [HttpGet]
+    [ProducesResponseType(200, Type = typeof(MyAppResponse<PagedResult<GetAllByPage{EntityName}Dto>>))]
+    public async Task<IActionResult> GetAllPagedList(string searchValue = "", string orderBy = "", bool orderAscendingDirection = true, int pageIndex = 1, int pageSize = 10)
+    {
+        try
+        {
+            var result = await _Mediator.Send(new GetAllByPage{EntityName}Query()
+            {
+                Search = searchValue,
+                SortColumnName = orderBy,
+                AscendingOrder = orderAscendingDirection,
+                PageIndex = pageIndex,
+                PageSize = pageSize
+            });
+
+            return ActionResult(result);
+        }
+        catch (Exception ex)
+        {
+            return ActionResult<string>(null, ex);
+        }
+    }
+
+    [HttpGet("{id:Guid}", Name = "GetById{EntityName}")]
+    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MyAppResponse<Get{EntityName}Dto>))]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesDefaultResponseType]
+    public async Task<IActionResult> GetById(Guid id)
+    {
+        try
+        {
+            var result = await _Mediator.Send(new GetById{EntityName}Query() { Id = id });
+            return ActionResult(result);
+        }
+        catch (Exception ex)
+        {
+            return ActionResult<string>(null, ex);
+        }
+    }
+
+    [HttpPost]
+    [ProducesResponseType(201, Type = typeof(Guid))]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> Create(Create{EntityName}Dto model)
+    {
+        try
+        {
+            if (model == null)
+            {
+                return BadRequest(new MyAppResponse<Get{EntityName}Dto>("Invalid object"));
+            }
+
+            var dtoValidator = new Create{EntityName}DtoValidator();
+            var validationResult = dtoValidator.Validate(model);
+
+            if (validationResult != null && validationResult.IsValid == false)
+            {
+                return ReturnActionResult("", false, validationResult.Errors.Select(modelError => modelError.ErrorMessage).ToList(), "", "");
+            }
+
+            var request = _Mapper.Map<Create{EntityName}Command>(model);
+            var result = await _Mediator.Send(request);
+
+            if (result.Succeeded)
+            {
+                // Fire-and-forget for the notification publishing
+                _ = Task.Run(() => _Mediator.Publish(new {EntityName}CreatedEvent(model)));
+            }
+
+            return ActionResult(result);
+        }
+        catch (Exception ex)
+        {
+            return ActionResult<string>(null, ex);
+        }
+    }
+
+    [HttpPut]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> Update(Update{EntityName}Dto model)
+    {
+        try
+        {
+            if (model == null)
+            {
+                return BadRequest(new MyAppResponse<bool>("Invalid object"));
+            }
+            
+            var dtoValidator = new Update{EntityName}DtoValidator();
+            var validationResult = dtoValidator.Validate(model);
+
+            if (validationResult != null && validationResult.IsValid == false)
+            {
+                return ReturnActionResult("", false, validationResult.Errors.Select(modelError => modelError.ErrorMessage).ToList(), "", "");
+            }
+
+            var request = _Mapper.Map<Update{EntityName}Command>(model);
+            var result = await _Mediator.Send(request);
+
+            if (result.Succeeded)
+            {
+                // Fire-and-forget for the notification publishing
+                _ = Task.Run(() => _Mediator.Publish(new {EntityName}UpdatedEvent(model)));
+            }
+
+            return ActionResult(result);
+        }
+        catch (Exception ex)
+        {
+            return ActionResult<string>(null, ex);
+        }
+    }
+
+    [HttpDelete("{id}")]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> Delete(Delete{EntityName}Dto model)
+    {
+        try
+        {
+            var result = await _Mediator.Send(new Delete{EntityName}Command() { Id = model.Id });
+
+            if (result.Succeeded)
+            {
+                // Fire-and-forget for the notification publishing
+                _ = Task.Run(() => _Mediator.Publish(new {EntityName}DeletedEvent(model)));
+            }
+
+            return ActionResult(result);
+        }
+        catch (Exception ex)
+        {
+            return ActionResult<string>(null, ex);
+        }
+    }
+}
+```
+
+## API Controller Guidelines
+
+### HTTP Methods and Actions:
+- **GET**: Retrieve data (GetAll, GetById, GetAllPagedList)
+- **POST**: Create new resources
+- **PUT**: Update existing resources
+- **DELETE**: Remove resources
+
+### Response Types:
+Use proper `ProducesResponseType` attributes to document API responses:
+
+```csharp
+[ProducesResponseType(200, Type = typeof(MyAppResponse<List<GetAll{EntityName}Dto>>))]
+[ProducesResponseType(StatusCodes.Status404NotFound)]
+[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+```
+
+### Error Handling:
+Always wrap operations in try-catch blocks and return appropriate error responses:
+
+```csharp
+try
+{
+    // Operation logic
+    return ActionResult(result);
+}
+catch (Exception ex)
+{
+    return ActionResult<string>(null, ex);
+}
+```
+
+### Validation:
+Validate DTOs before processing:
+
+```csharp
+var dtoValidator = new Create{EntityName}DtoValidator();
+var validationResult = dtoValidator.Validate(model);
+
+if (validationResult != null && validationResult.IsValid == false)
+{
+    return ReturnActionResult("", false, 
+        validationResult.Errors.Select(modelError => modelError.ErrorMessage).ToList(), 
+        "", "");
+}
+```
+
+### Event Publishing:
+Use fire-and-forget pattern for domain events:
+
+```csharp
+if (result.Succeeded)
+{
+    // Fire-and-forget for the notification publishing
+    _ = Task.Run(() => _Mediator.Publish(new {EntityName}CreatedEvent(model)));
+}
+```
+
+### Authorization:
+Apply authorization attributes where needed:
+
+```csharp
+[Authorize(Policy = AppPermissions.{EntityName}Permissions.Create)]
+[AllowAnonymous] // For public endpoints
+```
+
+### Route Templates:
+Use proper route templates with constraints:
+
+```csharp
+[HttpGet("{id:Guid}", Name = "GetById{EntityName}")]
+[HttpDelete("{id}")]
+```
+
+## Key Points
+- Inherit from `BaseApiController`
+- Use proper HTTP status codes
+- Implement consistent error handling
+- Apply validation before processing
+- Use fire-and-forget for events
+- Document APIs with Swagger attributes
+- Apply authorization consistently
+- Follow RESTful conventions
+
+
+
+
+
+
+
+

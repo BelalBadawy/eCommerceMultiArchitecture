@@ -1,0 +1,183 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Infrastructure Layer Guide (`eStoreCA.Infrastructure`)
+
+## Purpose
+This layer handles data access, external services, and infrastructure-specific concerns.
+
+## Rules
+- **Configure Entity Framework mappings**
+- **Handle identity and authorization**
+- **Implement external service integrations**
+- **Use dependency injection for service registration**
+
+## 9. Update ApplicationDbContext.cs File
+
+**Location**: `eStoreCA.Infrastructure\Data\ApplicationDbContext.cs`
+
+Add the DbSet to your context:
+
+```csharp
+public virtual DbSet<{EntityName}> {EntityName Plural} { get; set; }
+```
+
+## 10. Create Entity Configuration
+
+**Location**: `eStoreCA.Infrastructure\EntityConfiguration`
+
+**Namespace**: Ensure the namespace is `eStoreCA.Infrastructure.Data.EntityConfiguration`.
+
+### Entity Configuration Example:
+
+```csharp
+public partial class {EntityName}Configuration : IEntityTypeConfiguration<{EntityName}>
+{
+    public void Configure(EntityTypeBuilder<{EntityName}> builder)
+    {
+        // table
+        builder.ToTable("{EntityName Plural}", "dbo"); // Use the plural form for the table name
+
+        // key
+        builder.HasKey(t => t.Id);
+        builder.Property(t => t.Id).HasColumnName("Id").HasColumnType("uniqueidentifier").IsRequired();
+        builder.Property(t => t.Title).HasColumnName("Title").HasColumnType("nvarchar(255)").HasMaxLength(255).IsRequired();
+        builder.Property(t => t.IsActive).HasColumnName("IsActive").HasColumnType("bit").IsRequired();
+        builder.Property(t => t.CreatedBy).HasColumnName("CreatedBy").HasColumnType("uniqueidentifier").IsRequired();
+        builder.Property(t => t.CreatedAt).HasColumnName("CreatedAt").HasColumnType("datetime2").IsRequired();
+        builder.Property(t => t.LastModifiedBy).HasColumnName("LastModifiedBy").HasColumnType("uniqueidentifier");
+        builder.Property(t => t.LastModifiedAt).HasColumnName("LastModifiedAt").HasColumnType("datetime2");
+        builder.Property(t => t.RowVersion).HasColumnName("RowVersion").IsConcurrencyToken().ValueGeneratedOnAddOrUpdate();
+        builder.Property(t => t.IsDeleted).HasColumnName("IsDeleted").HasColumnType("bit").IsRequired(); // Changed from SoftDeleted to IsDeleted
+        builder.Property(t => t.DeletedBy).HasColumnName("DeletedBy").HasColumnType("uniqueidentifier");
+        builder.Property(t => t.DeletedAt).HasColumnName("DeletedAt").HasColumnType("datetime2");
+    }
+}
+```
+
+## Entity Configuration Guidelines
+
+### Standard Configuration Pattern:
+1. **Table Configuration**: Set table name and schema
+2. **Primary Key**: Configure primary key
+3. **Properties**: Configure each property with:
+   - Column name
+   - Data type
+   - Max length (where applicable)
+   - Required/Optional
+4. **Audit Fields**: Configure audit tracking properties
+5. **Soft Delete**: Configure soft delete properties
+6. **Concurrency**: Configure row version for optimistic concurrency
+
+### Property Configuration Examples:
+
+```csharp
+// String properties
+builder.Property(t => t.Title)
+    .HasColumnName("Title")
+    .HasColumnType("nvarchar(255)")
+    .HasMaxLength(255)
+    .IsRequired();
+
+// Boolean properties
+builder.Property(t => t.IsActive)
+    .HasColumnName("IsActive")
+    .HasColumnType("bit")
+    .IsRequired();
+
+// DateTime properties
+builder.Property(t => t.CreatedAt)
+    .HasColumnName("CreatedAt")
+    .HasColumnType("datetime2")
+    .IsRequired();
+
+// Nullable DateTime properties
+builder.Property(t => t.LastModifiedAt)
+    .HasColumnName("LastModifiedAt")
+    .HasColumnType("datetime2");
+
+// GUID properties
+builder.Property(t => t.Id)
+    .HasColumnName("Id")
+    .HasColumnType("uniqueidentifier")
+    .IsRequired();
+
+// Concurrency token
+builder.Property(t => t.RowVersion)
+    .HasColumnName("RowVersion")
+    .IsConcurrencyToken()
+    .ValueGeneratedOnAddOrUpdate();
+```
+
+### Relationships Configuration:
+
+```csharp
+// One-to-Many relationship
+builder.HasMany(t => t.Products)
+    .WithOne(p => p.Category)
+    .HasForeignKey(p => p.CategoryId)
+    .OnDelete(DeleteBehavior.Restrict);
+
+// Many-to-Many relationship
+builder.HasMany(t => t.Tags)
+    .WithMany(t => t.Categories)
+    .UsingEntity(j => j.ToTable("CategoryTags"));
+```
+
+### Indexes:
+
+```csharp
+// Single column index
+builder.HasIndex(t => t.Title)
+    .HasDatabaseName("IX_Categories_Title");
+
+// Composite index
+builder.HasIndex(t => new { t.Title, t.IsActive })
+    .HasDatabaseName("IX_Categories_Title_IsActive");
+
+// Unique index
+builder.HasIndex(t => t.Code)
+    .IsUnique()
+    .HasDatabaseName("IX_Categories_Code_Unique");
+```
+
+## Database Migration
+
+After creating the entity configuration:
+
+1. **Add Migration**:
+   ```bash
+   dotnet ef migrations add Add{EntityName}Entity
+   ```
+
+2. **Update Database**:
+   ```bash
+   dotnet ef database update
+   ```
+
+## Key Points
+- Use Entity Framework Core configuration for data access
+- Configure all entity properties explicitly
+- Use proper data types and constraints
+- Implement audit trail configuration
+- Configure soft delete properly
+- Use appropriate relationships and indexes
+- Follow naming conventions consistently
+
+
+# Quick Reference Checklist
+
+## 🏢 Infrastructure Layer (`eStoreCA.Infrastructure`)
+### Database Context
+- [ ] Update `ApplicationDbContext.cs`
+  ```csharp
+  public virtual DbSet<{EntityName}> {EntityName}Plural { get; set; }
+  ```
+
+### Entity Configuration
+- [ ] Create configuration: `EntityConfiguration/{EntityName}Configuration.cs`
+- [ ] Configure entity mapping, constraints, and relationships
+- [ ] Use plural form for table names
+

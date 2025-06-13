@@ -1,0 +1,524 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Application Layer Guide (`eStoreCA.Application`)
+
+## Purpose
+This layer contains application logic, CQRS implementation, and cross-cutting behaviors.
+It orchestrates the flow of data and business operations.
+
+## Rules
+- **Follow CQRS pattern** - separate Commands and Queries
+- **Use Mediator package for request handling**
+- **Use Mapster package for mapping objects**
+- **Implement validation using FluentValidation**
+- **Apply authorization attributes**
+- **Use pipeline behaviors for cross-cutting concerns**
+
+## Feature Structure
+
+```
+Features/
+├── {EntityName}/
+│   ├── Commands/
+│   │   ├── Create/
+│   │   │   ├── Create{Entity}CommandHandler.cs
+│   │   │   └── Create{Entity}CommandValidator.cs
+│   │   ├── Update/
+│   │   │   ├── Update{Entity}CommandHandler.cs
+│   │   │   └── Update{Entity}CommandValidator.cs
+│   │   └── Delete/
+│   │       ├── Delete{Entity}CommandHandler.cs
+│   │       └── Delete{Entity}CommandValidator.cs
+│   ├── Queries/
+│   │   ├── GetAll/
+│   │   │   └── GetAll{Entity}QueryHandler.cs
+│   │   ├── GetById/
+│   │   │   └── GetById{Entity}QueryHandler.cs
+│   │   └── GetAllByPage/
+│   │       └── GetAllByPage{Entity}QueryHandler.cs
+│   └── Events/
+│       ├── {Entity}CreatedEventHandler.cs
+│       ├── {Entity}UpdatedEventHandler.cs
+│       └── {Entity}DeletedEventHandler.cs
+```
+
+## 6. Create Commands and Queries
+
+**Location**: `eStoreCA.Application/Features/{EntityName}/Commands/` and `eStoreCA.Application/Features/{EntityName}/Queries/`
+
+**File Naming and Structure**:
+- Each command or query, along with its corresponding handler, should reside in a **single file**.
+- Name this file after the **handler class**. For example, `CreateCountryCommandHandler.cs` will contain both the `CreateCountryCommand` and the `CreateCountryCommandHandler`.
+- Validator classes should be in a separate file, e.g., `CreateCountryCommandValidator.cs`.
+
+**Namespace**:
+- **Use a flat namespace**, even though the files are in entity-specific folders. The folder structure is for organization only.
+- For all commands and their validators, use `namespace eStoreCA.Application.Features.Commands`.
+- For all queries, use `namespace eStoreCA.Application.Features.Queries`.
+
+### Create Command and Handler Example:
+
+**File: `eStoreCA.Application/Features/{EntityName}/Commands/Create/Create{EntityName}CommandHandler.cs`**
+```csharp
+// Start Create Code
+namespace eStoreCA.Application.Features.Commands
+{
+    #region Create Command Parameters
+    [Authorize(Policy = AppPermissions.{EntityName}Permissions.Create)]
+    public class Create{EntityName}Command : Create{EntityName}Dto, IRequest<MyAppResponse<Guid>>
+    {
+    }
+    #endregion
+
+    #region Create Command Handler
+    public class Create{EntityName}CommandHandler : IRequestHandler<Create{EntityName}Command, MyAppResponse<Guid>>
+    {
+        private readonly IApplicationDbContext _dbContext;
+        private readonly IMapper _mapper;
+
+        public Create{EntityName}CommandHandler(IMapper mapper, IApplicationDbContext dbContext)
+        {
+            _mapper = mapper;
+            _dbContext = dbContext;
+        }
+
+        public async ValueTask<MyAppResponse<Guid>> Handle(Create{EntityName}Command request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                {EntityName} entityToCreate = _mapper.Map<{EntityName}>(request);
+                await _dbContext.{EntityName Plural}.AddAsync(entityToCreate);
+
+                int effectedRows = await _dbContext.SaveChangesAsync(cancellationToken);
+                if (effectedRows != 0)
+                {
+                    return new MyAppResponse<Guid>(entityToCreate.Id, null);
+                }
+            }
+            catch (Exception ex)
+            {
+                return new MyAppResponse<Guid>("DB Error: " + ex.Message);
+            }
+            return new MyAppResponse<Guid>("Error in saving data");
+        }
+    }
+    #endregion
+}
+// End Create Code
+```
+### Create Command Validator Example:
+
+**File: `eStoreCA.Application/Features/{EntityName}/Commands/Create/Create{EntityName}CommandValidator.cs`**
+```csharp
+// Separate FluentValidation validator
+namespace eStoreCA.Application.Features.Commands
+{
+    public class Create{EntityName}CommandValidator : AbstractValidator<Create{EntityName}Command>
+    {
+        private readonly IApplicationDbContext _dbContext;
+        public Create{EntityName}CommandValidator(IApplicationDbContext dbContext)
+        {
+            _dbContext = dbContext;
+            RuleFor<Guid>(x => x.Id).NotEqual(Guid.Empty);
+            RuleFor(o => o.Title).NotEmpty().MaximumLength(255);
+
+            #region Custom Constructor
+            #endregion Custom Constructor
+
+            RuleFor(o => o.Title)
+                .NotEmpty()
+                .MaximumLength(255)
+                .MustAsync(async (command, Title, cancellationToken) => await UniqueTitle(Title, cancellationToken))
+                .WithMessage("Title must be unique.");
+        }
+
+        private async Task<bool> UniqueTitle(string name, CancellationToken cancellationToken)
+        {
+            return !await _dbContext.{EntityName Plural}
+                .AnyAsync(o => o.Title.ToUpper() == name.Trim().ToUpper(), cancellationToken);
+        }
+    }
+}
+```
+
+### Delete Command and Handler Example:
+
+**File: `eStoreCA.Application/Features/{EntityName}/Commands/Delete/Delete{EntityName}CommandHandler.cs`**
+```csharp
+// Start Delete Code
+namespace eStoreCA.Application.Features.Commands
+{
+    #region Create Command Parameters
+    [Authorize(Policy = AppPermissions.{EntityName}Permissions.Delete)]
+    public class Delete{EntityName}Command : Delete{EntityName}Dto, IRequest<MyAppResponse<bool>>
+    {
+    }
+    #endregion
+    #region Delete Command Handler
+    public class Delete{EntityName}CommandHandler : IRequestHandler<Delete{EntityName}Command, MyAppResponse<bool>>
+    {
+        private readonly IApplicationDbContext _dbContext;
+        public Delete{EntityName}CommandHandler(IApplicationDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+
+        public async ValueTask<MyAppResponse<bool>> Handle(Delete{EntityName}Command request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var entityToDelete = await _dbContext.{EntityName Plural}.FirstOrDefaultAsync(o => o.Id == request.
+                                                    Id, cancellationToken);
+                if (entityToDelete != null)
+                {
+                    _dbContext.{EntityName Plural}.Remove(entityToDelete);
+
+                    int effectedRows = await _dbContext.SaveChangesAsync(cancellationToken);
+                    if (effectedRows != 0)
+                    {
+                        return new MyAppResponse<bool>(true);
+                    }
+                    else
+                    {
+                        return new MyAppResponse<bool>("Error in saving data");
+                    }
+                }
+                else
+                {
+                    return new MyAppResponse<bool>("{EntityName} not found.");
+                }
+
+                return new MyAppResponse<bool>(true);
+            }
+            catch (Exception ex)
+            {
+                return new MyAppResponse<bool>("DB Error: " + ex.Message);
+            }
+            return new MyAppResponse<bool>(false);
+        }
+    }
+    #endregion
+}
+
+// End Delete Code
+```
+
+### Update Command and Handler Example:
+
+**File: `eStoreCA.Application/Features/{EntityName}/Commands/Update/Update{EntityName}CommandHandler.cs`**
+```csharp
+// Start Update Code
+namespace eStoreCA.Application.Features.Commands
+{
+    #region Update Command Parameters
+    [Authorize(Policy = AppPermissions.{EntityName}Permissions.Edit)]
+    public class Update{EntityName}Command : Update{EntityName}Dto, IRequest<MyAppResponse<bool>>
+    {
+    }
+    #endregion
+    #region Update Command Handler
+    public class Update{EntityName}CommandHandler : IRequestHandler<Update{EntityName}Command, MyAppResponse<bool>>
+    {
+        private readonly IApplicationDbContext _dbContext;
+        private readonly IMapper _mapper;
+
+        public Update{EntityName}CommandHandler(IMapper mapper, IApplicationDbContext dbContext)
+        {
+            _mapper = mapper;
+            _dbContext = dbContext;
+        }
+        public async ValueTask<MyAppResponse<bool>> Handle(Update{EntityName}Command request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var entityToUpdate = await _dbContext.{EntityName Plural}.FindAsync(request.Id, cancellationToken);
+                if (entityToUpdate != null)
+                {
+                    request.Adapt(entityToUpdate);
+
+                    _dbContext.{EntityName Plural}.Update(entityToUpdate);
+
+                    int effectedRows = await _dbContext.SaveChangesAsync(cancellationToken);
+                    if (effectedRows != 0)
+                    {
+                        return new MyAppResponse<bool>(true);
+                    }
+                }
+                else
+                {
+                    return new MyAppResponse<bool>("{EntityName} not found.");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return new MyAppResponse<bool>("DB Error: " + ex.Message);
+            }
+
+            return new MyAppResponse<bool>(false);
+        }
+    }
+    #endregion
+}
+
+// End Update Code
+```
+
+### GetAll Query and Handler Example:
+
+**File: `eStoreCA.Application/Features/{EntityName}/Queries/GetAll/GetAll{EntityName}QueryHandler.cs`**
+```csharp
+// Start GetAll Query Code
+namespace eStoreCA.Application.Features.Queries
+{
+    #region GetAll Query Parameters
+    [Authorize(Policy = AppPermissions.{EntityName}Permissions.List)]
+    public class GetAll{EntityName}Query : GetAll{EntityName}QueryDto, IRequest<MyAppResponse<List<GetAll{EntityName}Dto>>>, ICacheAbleMediatorQuery
+    {
+        public bool BypassCache { get; set; }
+        public string CacheKey => "GetAll{EntityName}Query";
+        public TimeSpan? SlidingExpiration { get; set; }
+        public Guid? Id { get; set; }
+    }
+    #endregion
+    #region GetAll Query Handler
+    public class GetAll{EntityName}QueryHandler : IRequestHandler<GetAll{EntityName}Query, MyAppResponse<List<GetAll{EntityName}Dto>>>
+    {
+        private readonly IApplicationDbContext _dbContext;
+
+        public GetAll{EntityName}QueryHandler(IApplicationDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+        public async ValueTask<MyAppResponse<List<GetAll{EntityName}Dto>>> Handle(GetAll{EntityName}Query request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var query = _dbContext.{EntityName Plural}.AsQueryable();
+
+                if (!string.IsNullOrEmpty(request.Search))
+                {
+
+                    if (!string.IsNullOrEmpty(request.Search))
+                    {
+                        query = query.Where(o => (string.IsNullOrEmpty(request.Search) || o.Title.ToUpper().Contains(request.Search)));
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(request.SortColumnName))
+                {
+                    query = request.AscendingOrder ? query.OrderByDynamic(request.SortColumnName, AppEnums.DataOrderDirection.Asc) : query.AsQueryable().OrderByDynamic(request.SortColumnName, AppEnums.DataOrderDirection.Desc);
+                }
+
+                var result = await query.AsNoTracking().ToListAsync(cancellationToken);
+
+                if (result.Any())
+                {
+                    return new MyAppResponse<List<GetAll{EntityName}Dto>>(result.Adapt<List<GetAll{EntityName}Dto>>());
+                }
+
+                return new MyAppResponse<List<GetAll{EntityName}Dto>>(data: null);
+            }
+            catch (Exception ex)
+            {
+                return new MyAppResponse<List<GetAll{EntityName}Dto>>("DB Error: " + ex.Message);
+            }
+        }
+    }
+    #endregion
+}
+
+// End GetAll Query Code
+```
+
+### GetAllByPage Query and Handler Example:
+
+**File: `eStoreCA.Application/Features/{EntityName}/Queries/GetAllByPage/GetAllByPage{EntityName}QueryHandler.cs`**
+```csharp
+// Start GetAllByPage Query Code
+namespace eStoreCA.Application.Features.Queries
+{
+    #region GetAllByPage Query Parameters
+    //   [Authorize(Policy = AppPermissions.{EntityName}Permissions.List)]
+    public class GetAllByPage{EntityName}Query : GetAllByPage{EntityName}QueryDto, IRequest<MyAppResponse<PagedResult<GetAllByPage{EntityName}Dto>>>
+    {
+    }
+    #endregion
+    #region GetAllByPage Query Handler
+    public class GetAllByPage{EntityName}QueryHandler : IRequestHandler<GetAllByPage{EntityName}Query, MyAppResponse<PagedResult<GetAllByPage{EntityName}Dto>>>
+    {
+        private readonly IApplicationDbContext _dbContext;
+        public GetAllByPage{EntityName}QueryHandler(IApplicationDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+        public async ValueTask<MyAppResponse<PagedResult<GetAllByPage{EntityName}Dto>>> Handle(GetAllByPage{EntityName}Query request, CancellationToken cancellationToken)
+        {
+            PagedResult<GetAllByPage{EntityName}Dto> pagedResult = null;
+
+            var query = _dbContext.{EntityName Plural}.AsQueryable();
+
+            if (!string.IsNullOrEmpty(request.Search))
+            {
+                if (!string.IsNullOrEmpty(request.Search))
+                {
+                    query = query.Where(o => (string.IsNullOrEmpty(request.Search) || o.Title.ToUpper().Contains(request.Search)));
+                }
+            }
+
+            if (!string.IsNullOrEmpty(request.SortColumnName))
+            {
+                query = request.AscendingOrder ? query.OrderByDynamic(request.SortColumnName, AppEnums.DataOrderDirection.Asc) : query.AsQueryable().OrderByDynamic(request.SortColumnName, AppEnums.DataOrderDirection.Desc);
+            }
+            try
+            {
+                var totalRecords = await query.CountAsync(cancellationToken);
+                if (totalRecords > 0)
+                {
+                    var result = await query.Skip((request.PageIndex - 1) * request.PageSize)
+                   .Take(request.PageSize).ToListAsync(cancellationToken);
+
+                    if (result.Any())
+                    {
+                        pagedResult = new PagedResult<GetAllByPage{EntityName}Dto>(
+                            result.Adapt<List<GetAllByPage{EntityName}Dto>>(),
+                            totalRecords,
+                            request.PageIndex,
+                            request.PageSize
+                        );
+
+                        return new MyAppResponse<PagedResult<GetAllByPage{EntityName}Dto>>(pagedResult);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return new MyAppResponse<PagedResult<GetAllByPage{EntityName}Dto>>("DB Error: " + ex.Message);
+            }
+
+            return new MyAppResponse<PagedResult<GetAllByPage{EntityName}Dto>>(pagedResult);
+        }
+    }
+    #endregion
+}
+// End GetAllByPage Query Code
+```
+
+
+### GetById Query and Handler Example:
+
+**File: `eStoreCA.Application/Features/{EntityName}/Queries/GetById/GetById{EntityName}QueryHandler.cs`**
+```csharp
+// Start GetById Query Code
+namespace eStoreCA.Application.Features.Queries
+{
+    #region GetById Query Parameters
+    [Authorize(Policy = AppPermissions.{EntityName}Permissions.View)]
+    public class GetById{EntityName}Query : GetById{EntityName}QueryDto, IRequest<MyAppResponse<GetById{EntityName}Dto>>
+    {
+    }
+    #endregion
+    #region GetById Query Handler
+    public class GetById{EntityName}QueryHandler : GetById{EntityName}QueryDto, IRequestHandler<GetById{EntityName}Query, MyAppResponse<GetById{EntityName}Dto>>
+    {
+        private readonly IApplicationDbContext _dbContext;
+
+        public GetById{EntityName}QueryHandler(IApplicationDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+        public async ValueTask<MyAppResponse<GetById{EntityName}Dto>> Handle(GetById{EntityName}Query request, CancellationToken cancellationToken)
+        {
+            var query = _dbContext.{EntityName Plural}.AsQueryable();
+
+            var result = await query.FirstOrDefaultAsync(o => o.Id == request.Id, cancellationToken);
+
+            if (result != null)
+            {
+                return new MyAppResponse<GetById{EntityName}Dto>(result.Adapt<GetById{EntityName}Dto>());
+            }
+            return new MyAppResponse<GetById{EntityName}Dto>(data: null);
+        }
+    }
+    #endregion
+}
+// End GetById Query Code
+```
+
+
+
+## 7. Create Entity Events Handlers
+
+**Location**: `eStoreCA.Application/Features/{EntityName}/Events/`
+
+### Event Handler Example:
+
+```csharp
+public class {EntityName}CreatedEventHandler : INotificationHandler<{EntityName}CreatedEvent>
+{
+    public async ValueTask Handle({EntityName}CreatedEvent notification, CancellationToken cancellationToken)
+    {
+        Console.WriteLine("CreatedEvent: " + notification);
+    }
+}
+```
+
+## 8. Update IApplicationDbContext.cs File
+
+**Location**: `eStoreCA.Application\Interfaces\Common\IApplicationDbContext.cs`
+
+Add a DbSet for your new entity:
+
+```csharp
+DbSet<{EntityName}> {EntityName Plural} { get; set; }
+```
+
+## Key Points
+- Separate read (Query) and write (Command) operations
+- Use Mediator pattern for loose coupling
+- Apply validation at the application boundary
+- Implement proper error handling
+- Use async/await for all database operations
+- Apply authorization attributes consistently
+
+
+# Quick Reference Checklist
+## 🎮 Application Layer (`eStoreCA.Application`)
+### Commands
+- [ ] Create command folder: `Features/{EntityName}/Commands/`
+- [ ] Create command handlers:
+  - [ ] `Create/{EntityName}CommandHandler.cs`
+  - [ ] `Update/{EntityName}CommandHandler.cs`
+  - [ ] `Delete/{EntityName}CommandHandler.cs`
+- [ ] Create command validators:
+  - [ ] `Create{EntityName}CommandValidator.cs`
+  - [ ] `Update{EntityName}CommandValidator.cs`
+  - [ ] `Delete{EntityName}CommandValidator.cs`
+
+### Queries
+- [ ] Create query folder: `Features/{EntityName}/Queries/`
+- [ ] Create query handlers:
+  - [ ] `GetAll/{EntityName}QueryHandler.cs`
+  - [ ] `GetById/{EntityName}QueryHandler.cs`
+  - [ ] `GetAllByPage/{EntityName}QueryHandler.cs`
+
+### Event Handlers
+- [ ] Create event handlers: `Features/{EntityName}/Events/`
+  - [ ] `{EntityName}CreatedEventHandler.cs`
+  - [ ] `{EntityName}UpdatedEventHandler.cs`
+  - [ ] `{EntityName}DeletedEventHandler.cs`
+
+### Context Interface
+- [ ] Update `IApplicationDbContext.cs`
+  ```csharp
+  DbSet<{EntityName}> {EntityName}Plural { get; set; }
+  ```
+
+
+
+
+
+

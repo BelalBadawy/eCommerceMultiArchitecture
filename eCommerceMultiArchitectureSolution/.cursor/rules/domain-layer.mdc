@@ -1,0 +1,165 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Domain Layer Guide (`eStoreCA.Domain`)
+
+## Purpose
+This layer contains the core business logic, entities, and domain events. 
+It is independent of other layers.
+
+## Rules
+- **Pure business logic only** - no external dependencies
+- **Entities inherit from BaseEntity<TId>**
+- **Implement domain interfaces**: `IAuditable`, `ISoftDelete`, `IDataConcurrency`
+- **Use domain events for cross-cutting concerns**
+- **reference Shared layer only**
+- **No infrastructure concerns**
+
+## 4. Creating Domain Entity
+
+**Location**: `eStoreCA.Domain/Entities/{EntityName}.cs`
+
+**Namespace**: Ensure the namespace is `eStoreCA.Domain.Entities`.
+
+### Entity Structure Example:
+
+```csharp
+public class {EntityName} : BaseEntity<Guid>, IAuditable, ISoftDelete, IDataConcurrency
+{
+    public string Title { get; set; }
+    public bool IsActive { get; set; }
+
+    // Audit fields from IAuditable
+    public Guid CreatedBy { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public Guid? LastModifiedBy { get; set; }
+    public DateTime? LastModifiedAt { get; set; }
+
+    // Soft delete from ISoftDelete
+    public bool IsDeleted { get; set; }
+    public DateTime? DeletedAt { get; set; }
+    public Guid? DeletedBy { get; set; }
+
+    // Concurrency from IDataConcurrency
+    public byte[] RowVersion { get; set; }
+}
+```
+
+## 5. Create Folder for Entity Events
+
+**Location**:
+- `eStoreCA.Domain/Events/{EntityName}/{EntityName}CreatedEvent.cs`
+- `eStoreCA.Domain/Events/{EntityName}/{EntityName}DeletedEvent.cs`
+- `eStoreCA.Domain/Events/{EntityName}/{EntityName}UpdatedEvent.cs`
+
+**Namespace for Domain Events**:
+- **Use a flat namespace**, even though the files are in entity-specific folders. The folder structure is for organization, but the namespace should remain `eStoreCA.Domain.Events`.
+
+```csharp
+// ✅ DO: Use the flat eStoreCA.Domain.Events namespace
+namespace eStoreCA.Domain.Events
+{
+    public class CountryCreatedEvent : IDomainEvent
+    {
+        // ...
+    }
+}
+```
+
+```csharp
+// ❌ DON'T: Use a nested namespace matching the folder structure
+namespace eStoreCA.Domain.Events.Country
+{
+    public class CountryCreatedEvent : IDomainEvent
+    {
+        // ...
+    }
+}
+```
+
+### Code Example:
+
+```csharp
+public class {EntityName}{MethodName}Event : IDomainEvent
+{
+    public {EntityName}{MethodName}Event({MethodName}{EntityName}Dto {entityName}CamelCase)
+    {
+        this.{EntityName} = {entityName}CamelCase;
+    }
+
+    public {MethodName}{EntityName}Dto {EntityName} { get; }
+}
+```
+
+Where `{MethodName}` can be Created, Deleted, or Updated. Replace `{entityName}CamelCase` with the camelCase version of your entity name and `{EntityName}` with the PascalCase version.
+
+## Domain Event Examples
+
+### Created Event
+```csharp
+public class {EntityName}CreatedEvent : IDomainEvent
+{
+    public {EntityName}CreatedEvent(Create{EntityName}Dto {EntityName})
+    {
+        this.{EntityName} = {EntityName};
+    }
+
+    public Create{EntityName}Dto {EntityName} { get; }
+}
+```
+
+### Updated Event
+```csharp
+public class {EntityName}UpdatedEvent : IDomainEvent
+{
+    public {EntityName}UpdatedEvent(Update{EntityName}Dto {EntityName})
+    {
+        this.{EntityName} = {EntityName};
+    }
+
+    public Update{EntityName}Dto {EntityName} { get; }
+}
+```
+
+### Deleted Event
+```csharp
+public class {EntityName}DeletedEvent : IDomainEvent
+{
+    public {EntityName}DeletedEvent(Delete{EntityName}Dto {EntityName})
+    {
+        this.{EntityName} = {EntityName};
+    }
+
+    public Delete{EntityName}Dto {EntityName} { get; }
+}
+```
+
+## Key Points
+- Keep domain entities focused on business logic
+- Implement all required interfaces (`IAuditable`, `ISoftDelete`, `IDataConcurrency`)
+- Use domain events to communicate changes
+- No dependencies on external layers
+- Maintain rich domain model with behavior, not just data
+
+
+# Quick Reference Checklist
+
+## 🏗️ Domain Layer (`eStoreCA.Domain`)
+### Entity
+- [ ] Create entity: `eStoreCA.Domain/Entities/{EntityName}.cs`
+- [ ] Inherit from `BaseEntity<Guid>`
+- [ ] Implement interfaces: `IAuditable`, `ISoftDelete`, `IDataConcurrency`
+- [ ] Add entity properties
+
+### Domain Events
+- [ ] Create event folder: `eStoreCA.Domain/Events/{EntityName}/`
+- [ ] Create domain events:
+    - [ ] `{EntityName}CreatedEvent.cs`
+    - [ ] `{EntityName}UpdatedEvent.cs`
+    - [ ] `{EntityName}DeletedEvent.cs`
+
+
+
+

@@ -1,0 +1,222 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Shared Layer Guide (`eStoreCA.Shared`)
+
+## Purpose
+This layer contains Data Transfer Objects (DTOs), common interfaces, and cross-cutting models that are shared across different layers of the application.
+
+## Rules
+* **Define all DTOs here**
+* **Implement common interfaces**
+* **Provide response models**
+* **Handle localization resources**
+
+## 1. Update `AppPermissions.cs` File
+
+**Location**: `eStoreCA.Shared\Common\AppPermissions.cs`
+
+Add a new static class for your entity's permissions:
+
+```csharp
+public static class {EntityName}Permissions
+{
+    public const string List = "Permissions.{EntityName}.List";
+    public const string View = "Permissions.{EntityName}.View";
+    public const string Create = "Permissions.{EntityName}.Create";
+    public const string Edit = "Permissions.{EntityName}.Edit";
+    public const string Delete = "Permissions.{EntityName}.Delete";
+}
+```
+
+## 2. Create DTOs
+
+**Location**: `eStoreCA.Shared/Dtos/{EntityName}/`
+
+> **IMPORTANT NAMESPACE RULE:**
+> All DTOs, regardless of their entity folder, **must** belong to the `eStoreCA.Shared.Dtos` namespace. Do **not** append the entity name to the namespace.
+
+**Correct Example (`CreateCountryDto.cs`):**
+```csharp
+// ✅ DO: Keep the namespace flat
+namespace eStoreCA.Shared.Dtos
+{
+    public class CreateCountryDto
+    {
+        // ...
+    }
+}
+```
+
+**Incorrect Example:**
+```csharp
+// ❌ DON'T: Add the entity name to the namespace
+namespace eStoreCA.Shared.Dtos.Country // This is incorrect
+{
+    public class CreateCountryDto
+    {
+        // ...
+    }
+}
+```
+
+### Required Files:
+- `Create{EntityName}Dto.cs`
+- `Create{EntityName}DtoValidator.cs` (for validation before calling the Mediator)
+- `Update{EntityName}Dto.cs`
+- `Update{EntityName}DtoValidator.cs`  (for validation before calling the Mediator)
+- `GetById{EntityName}Dto.cs`
+- `GetById{EntityName}QueryDto.cs` (for sending to Mediator)
+- `GetAllByPage{EntityName}Dto.cs`
+- `GetAllByPage{EntityName}QueryDto.cs` (for sending to Mediator)
+- `GetAll{EntityName}Dto.cs` (for list retrieval)
+- `GetAll{EntityName}QueryDto.cs` (for sending to Mediator)
+- `Delete{EntityName}Dto.cs` (if needed for deletion operations have the entity keys)
+- `Delete{EntityName}DtoValidator.cs` (for validation before calling the Mediator)
+
+
+### DTO Naming Conventions:
+- `Create{EntityName}Dto.cs`: For creation operations
+- `Update{EntityName}Dto.cs`: For update operations
+- `Get{EntityName}Dto.cs`: For single entity retrieval
+- `GetAll{EntityName}Dto.cs`: For list retrieval
+- `GetAllByPage{EntityName}Dto.cs`: For paginated retrieval
+- `Delete{EntityName}Dto.cs`: For deletion (if needed)
+
+### DTO Location Example:
+```
+eStoreCA.Shared/
+├── Dtos/
+│   ├── Auth/
+│   │   ├── LoginDto.cs
+│   │   ├── RegisterDto.cs
+│   │   └── RefreshTokenDto.cs
+│   ├── {EntityName}/
+│   │   ├── Create{EntityName}Dto.cs
+│   │   ├── Update{EntityName}Dto.cs
+│   │   ├── Get{EntityName}Dto.cs
+│   │   └── GetAllByPage{EntityName}Dto.cs
+│   └── {NewEntity}/
+│       ├── Create{Entity}Dto.cs
+│       ├── Update{Entity}Dto.cs
+│       └── Get{Entity}Dto.cs
+```
+
+## 3. Create DTO Validation File
+
+**Location**: Beside the DTO file (e.g., `eStoreCA.Shared/Dtos/{EntityName}/Create{EntityName}DtoValidator.cs`)
+
+Use FluentValidation for DTO validation:
+
+```csharp
+// Separate FluentValidation validator
+public class Create{EntityName}DtoValidator : AbstractValidator<Create{EntityName}Dto>
+{
+    public Create{EntityName}DtoValidator()
+    {
+        RuleFor(x => x.Title)
+            .NotEmpty().WithMessage("Title is required")
+            .MaximumLength(100).WithMessage("Title cannot exceed 100 characters");
+    }
+}
+```
+
+
+// Start code example for GetAllByPage{EntityName}QueryDto
+
+public class GetAllByPage{EntityName}QueryDto
+    {
+        private const int MaxPageSize = 50;
+        public int PageIndex { get; set; } = 1;
+        private int _pageSize = 10;
+        public int PageSize
+        {
+            get => _pageSize;
+            set => _pageSize = (value > MaxPageSize) ? MaxPageSize : value;
+        }
+        public string? SortColumnName { get; set; }
+        public bool AscendingOrder { get; set; }
+
+        private string? _search;
+        public string? Search
+        {
+            get => _search;
+            set => _search = (string.IsNullOrEmpty(value) ? "" : value.ToUpper());
+        }
+    }
+
+// End code example for GetAllByPage{EntityName}QueryDto
+
+
+// Start code example for GetAll{EntityName}QueryDto
+ public class GetAll{EntityName}QueryDto
+    {
+        public string SortColumnName { get; set; }
+        public bool AscendingOrder { get; set; }
+        private string _search;
+        public string Search
+        {
+            get => _search;
+            set => _search = (string.IsNullOrEmpty(value) ? "" : value.ToUpper());
+        }
+    }
+
+// End code example for GetAll{EntityName}QueryDto
+
+
+// Start code example for GetById{EntityName}QueryDto
+    public class GetById{EntityName}QueryDto
+    {
+        public Guid Id { get; set; }
+
+    }
+// End code example for GetById{EntityName}QueryDto
+
+
+## Key Points
+- Keep DTOs simple and focused on data transfer
+- Use FluentValidation for input validation
+- Follow consistent naming conventions
+- Organize DTOs by entity in separate folders
+- Ensure proper namespace structure
+
+
+# Quick Reference Checklist
+
+## 🔐 Shared Layer (`eStoreCA.Shared`)
+### Permissions
+- [ ] Update `AppPermissions.cs` with new entity permissions
+  ```csharp
+  public static class {EntityName}Permissions
+  {
+      public const string List = "Permissions.{EntityName}.List";
+      public const string View = "Permissions.{EntityName}.View";
+      public const string Create = "Permissions.{EntityName}.Create";
+      public const string Edit = "Permissions.{EntityName}.Edit";
+      public const string Delete = "Permissions.{EntityName}.Delete";
+  }
+  ```
+
+### DTOs
+- [ ] Create DTO folder: `eStoreCA.Shared/Dtos/{EntityName}/`
+- [ ] Create required DTOs:
+- [ ] `Create{EntityName}Dto.cs`
+- [ ] `Update{EntityName}Dto.cs`
+- [ ] `GetById{EntityName}Dto.cs`
+- [ ] `GetById{EntityName}QueryDto.cs` (for sending to Mediator)
+- [ ] `GetAllByPage{EntityName}Dto.cs`
+- [ ] `GetAllByPage{EntityName}QueryDto.cs` (for sending to Mediator)
+- [ ] `GetAll{EntityName}Dto.cs` (for list retrieval)
+- [ ] `GetAll{EntityName}QueryDto.cs` (for sending to Mediator)
+- [ ] `Delete{EntityName}Dto.cs` (if needed for deletion operations have the entity keys)
+
+
+### Validation
+- [ ] Create DTO validators using FluentValidation
+- [ ] `Create{EntityName}DtoValidator.cs` (for validation before calling the Mediator)
+- [ ] `Update{EntityName}DtoValidator.cs`  (for validation before calling the Mediator)
+- [ ] `Delete{EntityName}DtoValidator.cs` (for validation before calling the Mediator)
+
+
