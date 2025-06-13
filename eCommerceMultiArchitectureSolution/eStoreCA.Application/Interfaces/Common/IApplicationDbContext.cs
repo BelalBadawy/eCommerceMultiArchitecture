@@ -1,4 +1,3 @@
-
 using Microsoft.EntityFrameworkCore;
 using eStoreCA.Domain.Entities;
 using System.Data;
@@ -29,6 +28,7 @@ namespace eStoreCA.Application.Interfaces
         DbSet<AppClaim> AppClaims { get; set; }
         DbSet<RefreshToken> RefreshTokens { get; set; }
         DbSet<Category> Categories { get; set; }
+        DbSet<Country> Countries { get; set; }
         #region Custom
         #endregion Custom
 

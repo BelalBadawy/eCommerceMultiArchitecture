@@ -1,4 +1,3 @@
-
 using Dapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -55,6 +54,7 @@ namespace eStoreCA.Infrastructure.Data
         public virtual DbSet<AuditTrailLog> AuditTrailLogs { get; set; }
         public virtual DbSet<LogUserActivity> LogUserActivities { get; set; }
         public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
+        public virtual DbSet<Country> Countries { get; set; }
         public virtual DbSet<Category> Categories { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -323,20 +323,20 @@ namespace eStoreCA.Infrastructure.Data
                     }
                     else
                     {
-                        throw new ApplicationException("Don’t know handling of concurrency conflict " + item.Metadata.Name);
+                        throw new ApplicationException("Don't know handling of concurrency conflict " + item.Metadata.Name);
                     }
                 }
             }
             catch (DbUpdateException e)
             {
-                //This either returns a error string, or null if it can’t handle that error
+                //This either returns a error string, or null if it can't handle that error
                 var sqlException = e.GetBaseException();
                 if (sqlException != null)
                 {
                     throw new ApplicationException(sqlException.Message, sqlException.InnerException); //return the error string
                 }
-                throw new ApplicationException("couldn’t handle that error"); //return the error string
-                //couldn’t handle that error, so rethrow
+                throw new ApplicationException("couldn't handle that error"); //return the error string
+                //couldn't handle that error, so rethrow
             }
 
 

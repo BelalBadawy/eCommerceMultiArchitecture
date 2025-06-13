@@ -14,7 +14,7 @@ namespace eStoreCA.Shared.Common
         #region Custom Roles
         #endregion Custom Roles
 
-        
+
         //}
 
         public static List<PermissionModule> GetPermissionsModules()
@@ -80,6 +80,15 @@ namespace eStoreCA.Shared.Common
             public const string Create = "Permissions.Category.Create";
             public const string Edit = "Permissions.Category.Edit";
             public const string Delete = "Permissions.Category.Delete";
+        }
+
+        public static class CountryPermissions
+        {
+            public const string List = "Permissions.Country.List";
+            public const string View = "Permissions.Country.View";
+            public const string Create = "Permissions.Country.Create";
+            public const string Edit = "Permissions.Country.Edit";
+            public const string Delete = "Permissions.Country.Delete";
         }
 
         #region Custom Permissions
